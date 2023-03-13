@@ -39,6 +39,13 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
 
 Resources:
+  Vpc:
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "./vpc.yml"
+      
   TaskRole:
     Type: AWS::IAM::Role
     Properties:

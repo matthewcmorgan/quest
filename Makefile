@@ -16,3 +16,6 @@ stop:
 
 clean:
 	docker rm -f `docker ps -aq` || exit 0
+
+deploy:
+	aws cloudformation package --template-file CloudFormation/Service.yml --s3-bucket matthew.morgan.bucket && aws cloudformation deploy --template-file packaged.yml --stack-name mmorgan-ecs-test
