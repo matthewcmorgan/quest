@@ -233,7 +233,7 @@ Resources:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
       NetworkAclId: !Ref PrivateSubnet1NetworkAcl
-      RuleNumber: 200
+      RuleNumber: 101
       Protocol: -1
       Egress: true
       RuleAction: allow
@@ -241,3 +241,15 @@ Resources:
       PortRange:
         From: 1
         To: 65535
+
+Outputs:
+  VpcId: 
+    Value: !Ref Vpc
+  PrivateSubnetA: 
+    Value: !Ref PrivateSubnet1
+  PrivateSubnetB: 
+    Value: !Ref PrivateSubnet2
+  PublicSubnetA: 
+    Value: !Ref PublicSubnet1
+  PublicSubnetB: 
+    Value: !Ref PublicSubnet2

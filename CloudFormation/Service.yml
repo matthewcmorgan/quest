@@ -32,11 +32,11 @@ Parameters:
     Type: Number
     Default: 1
   VpcId:
-    Type: AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>
+    Type: String
   SubnetA:
-    Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
+    Type: String
   SubnetB:
-    Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
+    Type: String
 
 Resources:
   Vpc:
