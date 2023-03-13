@@ -1,18 +1,22 @@
 FROM node:lts-alpine as build
 WORKDIR /src
 COPY package*.json ./
-RUN npm install . \
+COPY src/ .
+RUN npm install -g npm \
+    && npm install . \
     && npm prune --omit=dev --omit=optional \
     && npm cache clean --force
 
-COPY src/ .
+FROM nginx:stable-alpine as final
+RUN apk add --no-cache nodejs
 
-FROM node:lts-alpine as base
-WORKDIR /app
-EXPOSE 3000
+COPY --from=build /src /usr/share/nginx/html/src
+COPY bin/ /usr/share/nginx/html/bin
+COPY config/nginx.conf /etc/nginx/conf.d/default.conf
 
-FROM base as final
-WORKDIR /app
-COPY --from=build /src /app
-CMD [ "npm", "start" ]
-HEALTHCHECK CMD wget --quiet --tries=1 --spider http://localhost:3000/health || exit 1
+HEALTHCHECK CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1
+WORKDIR /usr/share/nginx/html
+USER nginx
+
+EXPOSE 80 3000
+CMD ["sh", "-c", "node src/000.js && nginx -g 'daemon off;'"]

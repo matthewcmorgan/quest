@@ -1,7 +1,7 @@
 {
   "name": "quest",
   "version": "1.0.0",
-  "description": "",
+  "description": "a quest in the cloud.",
   "main": "src/000.js",
   "scripts": {
     "start": "node src/000.js"

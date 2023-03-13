@@ -1,0 +1,55 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      docker: '18'
+      node: '16'
+  pre_build:
+    commands:
+      # Login to ECR
+      - |
+        aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}
+
+      # Install checkov
+      - pip install --upgrade pip checkov --quiet
+
+      # Install Trivy
+      - TRIVY_VERSION=$(curl -fsSL "https://api.github.com/repos/auqusecurity/trivy/releases/latest" | jq -r '.tag_name' | cut -c2-)
+      - rpm -ivh https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.rpm
+
+      # Install Cosign
+      - COSIGN_VERSION=$(curl -fsSL "https://api.github.com/repos/sigstore/cosign/releases/latest" | jq -r '.tag_name' | cut -c2-)
+      - rpm -ivh https://github.com/sigstore/cosign/releases/download/v${COSIGN_VERSION}/cosign_${COSIGN_VERSION}.x86_64.rpm
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - IMAGE_REPO_NAME=quest-app
+      - IMAGE_URI=$IMAGE_REPO_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - DOCKER_FILE='../Dockerfile'
+      # Run Chekov against image
+      - checkov --file Dockerfile --output junitxml --output cli --output-file-path console,results.xml 
+      # Build Image
+      - docker build -t ${IMAGE_URI} ${DOCKER_FILE}
+      # Trivy Scan  image
+      - trivy image ${IMAGE_URI} --format cosign-vuln --output trivy.output
+      - IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_URI})
+      # Experimental keyless signing with cosign
+      - COSIGN_EXPERIMENTAL=1 cosign sign --payload trivy.output
+      - COSIGN_EXPERIMENTAL=1 cosign sign --payload results.xml
+      - COSIGN_EXPERIMENTAL=1 cosign sign ${IMAGE_URI_DIGEST}
+      # Verify keyless signature with cosign
+      - COSIGN_EXPERIMENTAL=1 cosign verify ${IMAGE_URI_DIGEST}
+
+      # Push signed Image to ECR
+      - docker push ${REPOSITORY_URI}:${IMAGE_URI_DIGEST}
+
+reports:
+  checkovScan:
+    files:
+      - results.xml
+    file-format: junitxml
+
+artifacts:
+  files:
+    - '**/*'
