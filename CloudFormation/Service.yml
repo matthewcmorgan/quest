@@ -3,7 +3,7 @@ Description: 'Builds Delivery Pipeline and componets to deploy a fargate ecs tas
 Parameters:
   ServiceName:
     Type: String
-    Default: 'mcm-quest-service'
+    Default: mcm-quest-service
   GitHubTokenName:
     Type: String
     Default: GITHUB_ACCESS_TOKEN
@@ -110,6 +110,8 @@ Resources:
               Protocol: tcp
 
   ECSAutoScaling:
+    DependsOn:
+      - Service
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     Properties:
       MaxCapacity: !Ref MaxCapacity

@@ -18,7 +18,5 @@ clean:
 	docker rm -f `docker ps -aq` || exit 0
 
 deploy:
-	aws cloudformation validate-template --template-body CloudFormation/Service.yml \
-	&& aws cloudformation package --template-file CloudFormation/Service.yml --s3-bucket matthew.morgan.bucket \
-	&& aws cloudformation estimate-template-cost --template-body code/quest/packaged.yml \
+	aws cloudformation package --template-file CloudFormation/Service.yml --s3-bucket matthew.morgan.bucket --output-template-file packaged.yml\
 	&& aws cloudformation deploy --template-file packaged.yml --stack-name mmorgan-ecs-test --capabilities CAPABILITY_NAMED_IAM
