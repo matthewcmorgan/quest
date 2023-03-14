@@ -3,7 +3,7 @@ Description: 'Builds Delivery Pipeline and componets to deploy a fargate ecs tas
 Parameters:
   ServiceName:
     Type: String
-    Default: 'mcmQuest'
+    Default: 'mcm-quest-service'
   GitHubTokenName:
     Type: String
     Default: GITHUB_ACCESS_TOKEN
@@ -31,12 +31,6 @@ Parameters:
   MinCapacity:
     Type: Number
     Default: 1
-  VpcId:
-    Type: String
-  SubnetA:
-    Type: String
-  SubnetB:
-    Type: String
 
 Resources:
   Vpc:
@@ -112,7 +106,7 @@ Resources:
         - Name: !Ref ServiceName
           Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ServiceName}
           PortMappings:
-            - ContainerPort: 80
+            - ContainerPort: 443
               Protocol: tcp
 
   ECSAutoScaling:
@@ -156,6 +150,25 @@ Resources:
                 Action: [cloudwatch:DescribeAlarms, cloudwatch:GetMetricStatistics, cloudwatch:PutMetricAlarm]
                 Resource: '*'
 
+  AutoScalingCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      AlarmDescription: Container CPU Utilization High
+      Statistic: Average
+      Threshold: 75
+      Period: 300
+      AlarmActions:
+        - !Ref ECSAutoScalingPolicy
+      Namespace: AWS/ECS
+      Dimensions:
+        - Name: ServiceName
+          Value: !GetAtt Service.Name
+        - Name: ClusterName
+          Value: !Ref Cluster
+      MetricName: CPUUtilization
+
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -197,7 +210,25 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Security group for ECS
-      VpcId: !Ref VpcId
+      VpcId: !GetAtt Vpc.Outputs.VpcId
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          Description: Allow outbound traffic
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          Description: Allow ingress on 443 from Alb
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
+
+  Repository:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Delete
+    Properties:
+      RepositoryName: !Ref ServiceName
+      LifecyclePolicy:
+        LifecyclePolicyText: '{"rules": [{"rulePriority": 1, "description": "keep last 5 images", "selection": { "tagStatus": "any", "countType": "imageCountMoreThan", "countNumber": 5}, "action": { "type": "expire"}}]}'
 
   Cluster:
     Type: AWS::ECS::Cluster
@@ -220,19 +251,46 @@ Resources:
           AssignPublicIp: ENABLED
           SecurityGroups: [!Ref ECSSecurityGroup]
           Subnets: 
-            - !Ref SubnetA
-            - !Ref SubnetB
+            - !GetAtt Vpc.Outputs.PrivateSubnetA
+            - !GetAtt Vpc.Outputs.PrivateSubnetB
       LoadBalancers:
         - ContainerName: !Ref ServiceName
           TargetGroupArn: !Ref ALBTargetGroup
+
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !GetAtt Vpc.Outputs.VpcId
+      GroupDescription: !Sub ${ServiceName} SG for ALB
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow outbound TCP Traffic to anywhere
+          IpProtocol: "-1"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          Description: Allow inbound TCP traffic on 80
+          CidrIp: 0.0.0.0/0
+
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Ref ServiceName
+      Scheme: internal
+      SecurityGroups:
+        - !Ref AlbSecurityGroup
+      Subnets:
+        - !GetAtt Vpc.Outputs.PublicSubnetA
+        - !GetAtt Vpc.Outputs.PublicSubnetB
 
   ALBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       Name: !Ref ServiceName
-      Protocol: HTTP
-      Port: 80
-      VpcId: !Ref VpcId
+      Protocol: HTTPS
+      Port: 443
+      VpcId: !GetAtt Vpc.Outputs.VpcId
       TargetType: ip
       HealthCheckIntervalSeconds: 30
       HealthCheckPath: /healthcheck
@@ -374,8 +432,17 @@ Resources:
                 - Name: BuildOutput
               RunOrder: 1
 
+  ServiceLogs:
+    Type: AWS::Logs::LogGroup
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub ${ServiceName}
+      RetentionInDays: 7
+
 Outputs:
   ServiceEndpoint:
-    Value: !Join ['', [http://, !GetAtt [Service, LoadBalancers, 0, DNSName]]]
-    Export:
-      Name: !Sub ${AWS::StackName}-service-endpoint
+    Value: !Sub ${AWS::StackName}-service-endpoint
+  LogGroup:
+    Value: !Ref ServiceLogs
+  
