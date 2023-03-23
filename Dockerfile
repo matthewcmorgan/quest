@@ -14,6 +14,7 @@ FROM nginx:stable-alpine as final
 RUN apk add --no-cache nodejs openssl
 
 COPY --from=build /src /usr/share/nginx/html/src
+COPY --from=build /etc/pki/tls/certs/make-dummy-cert /etc/pki/tls/certs/make-dummy-cert
 COPY bin/ /usr/share/nginx/html/bin
 RUN /etc/pki/tls/certs/make-dummy-cert /etc/ssl/certs
 COPY config/nginx.conf /etc/nginx/conf.d/default.conf
