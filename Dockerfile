@@ -2,16 +2,20 @@ FROM node:lts-alpine as build
 WORKDIR /src
 COPY package*.json ./
 COPY src/ .
+RUN apk add --no-cache openssl
+
 RUN npm install -g npm \
     && npm install . \
     && npm prune --omit=dev --omit=optional \
     && npm cache clean --force
+COPY --chmod=0744 config/make_dummy_cert.sh /etc/pki/tls/certs/make-dummy-cert
 
 FROM nginx:stable-alpine as final
-RUN apk add --no-cache nodejs
+RUN apk add --no-cache nodejs openssl
 
 COPY --from=build /src /usr/share/nginx/html/src
 COPY bin/ /usr/share/nginx/html/bin
+RUN /etc/pki/tls/certs/make-dummy-cert /etc/ssl/certs
 COPY config/nginx.conf /etc/nginx/conf.d/default.conf
 
 HEALTHCHECK CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1

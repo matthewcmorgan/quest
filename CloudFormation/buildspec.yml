@@ -43,6 +43,7 @@ phases:
 
       # Push signed Image to ECR
       - docker push ${REPOSITORY_URI}:${IMAGE_URI_DIGEST}
+      - printf '{"ImageURI":"%s", "Tag":"%s"}' "$REPOSITORY_URI:$IMAGE_TAG" "$IMAGE_TAG" | tee imageDetail.json
 
 reports:
   checkovScan:
@@ -52,4 +53,6 @@ reports:
 
 artifacts:
   files:
+    - imageDetail.json
+    - Service.yml
     - '**/*'

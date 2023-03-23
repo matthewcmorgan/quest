@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Builds vpc and supporting infra.
+Parameters:
+  ServiceName:
+    Type: String
+    Default: mcm-quest-service
+
+Resources:
+  Vpc:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Properties:
+      TemplateURL: "./Vpc.yml"
+
+  Roles:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Properties:
+      TemplateURL: "./Roles.yml"
+
+  ServiceLogs:
+    Type: AWS::Logs::LogGroup
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub ${ServiceName}
+      RetentionInDays: 7
+
+  Ecs:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Properties:
+      TemplateURL: "./Ecs.yml"
+      Parameters:
+        ServiceName: !Ref ServiceName
+        Vpc: !GetAtt Vpc.Outputs.VpcId
+        PublicSubnet1: !GetAtt Vpc.Outputs.PublicSubnet1
+        PublicSubnet2: !GetAtt Vpc.Outputs.PublicSubnet2
+
+  Pipeline:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Properties:
+      TemplateURL: "./Pipeline.yml"
+      Parameters:
+        VpcId: !GetAtt Vpc.Outputs.VpcId
+        PrivateSubnetA: !GetAtt Vpc.Outputs.PrivateSubnetA
+        PrivateSubnetB: !GetAtt Vpc.Outputs.PrivateSubnetB
+        ExecutionRoleArn: !GetAtt Roles.Outputs.ExecutionRoleArn
+        TaskRoleArn: !GetAtt Roles.Outputs.TaskRoleArn
+        AutoScalingRoleArn: !GetAtt Roles.Outputs.AutoScalingRoleArn
+        ClusterName: !GetAtt Ecs.Outputs.ClusterName
+        ServiceName: !Ref ServiceName
+        ECSSecurityGroup: !GetAtt Ecs.Outputs.ECSSecurityGroup
+        ServiceLogs: !Ref ServiceLogs

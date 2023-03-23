@@ -1,0 +1,30 @@
+name: Deploy Persistent Infrastructure
+
+on:
+  push:
+    branches:
+      - mmorgan
+
+jobs:
+  deploy_infra:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the source code from the Github repository
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      
+      - name: Setup Infrastructure
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+          
+      - name: Deploy Persistent Infrastructure
+        uses: aws-actions/aws-cloudformation-action@v1
+        with:
+          stack-name: persistent-infra-stack
+          template: ./persistent-infra/persistent-infra.yml
+          stack-policy: ./persistent-infra/stack-policy.json
+          capabilities: CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+          region: us-west-2

@@ -1,0 +1,206 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Builds Roles for Stack
+Parameters:
+  GitHubTokenName:
+    Type: String
+    Default: GITHUB_ACCESS_TOKEN
+  GitHubRepositoryName:
+    Type: String
+    Default: quest
+  GitHubOwner:
+    Type: String
+    Default: matthewcmorgan
+  GitHubBranch:
+    Type: String
+    Default: mmorgan
+  VpcId: 
+    Type: String
+  PrivateSubnetA:
+    Type: String
+  PrivateSubnetB:
+    Type: String
+  ExecutionRoleArn:
+    Type: String
+  TaskRoleArn:
+    Type: String
+  AutoScalingRoleArn:
+    Type: String
+  ServiceName:
+    Type: String
+  ClusterName:
+    Type: String
+  ECSSecurityGroup:
+    Type: String
+  ServiceLogs:
+    Type: String
+
+Resources:
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Ref ServiceName
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:4.0
+        Type: LINUX_CONTAINER
+        EnvironmentVariables:
+          - Name: AWS_DEFAULT_REGION
+            Value: !Ref AWS::Region
+          - Name: AWS_ACCOUNT_ID
+            Value: !Ref AWS::AccountId
+          - Name: REPOSITORY_URI
+            Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ServiceName}
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec.yml
+      TimeoutInMinutes: 15
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+        # More than necessary
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess
+
+  CodePipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-codepipeline-service-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+              AWS:
+                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: CodePipelineServiceRolePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
+                Resource:
+                  - !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}/*
+                  - !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}/*
+
+  CodePipelineS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-codepipeline-source-artifacts
+
+  CodePipelineS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref CodePipelineS3Bucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject
+            Effect: Allow
+            Principal: '*'
+            Resource:
+              - !Sub 'arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}/*'
+          - Action:
+              - s3:PutObject
+              - s3:GetBucketVersioning
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${CodePipelineServiceRole}
+            Resource:
+              - !Sub 'arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}/*'
+              - !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}
+
+  CodePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      RoleArn: !GetAtt CodePipelineServiceRole.Arn
+      ArtifactStore:
+        Location: !Ref CodePipelineS3Bucket
+        Type: S3
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: SourceAction
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: '1'
+                Provider: GitHub
+              Configuration:
+                Owner: !Ref GitHubOwner
+                Repo: !Ref GitHubRepositoryName
+                Branch: !Ref GitHubBranch
+                OAuthToken: !Ref GitHubTokenName
+                PollForSourceChanges: false
+              OutputArtifacts:
+                - Name: SourceArtifact
+              RunOrder: 1
+        - Name: Build
+          Actions:
+            - Name: BuildAction
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+              InputArtifacts:
+                - Name: SourceArtifact
+              OutputArtifacts:
+                - Name: BuildOutput
+              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: DeployAction
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              Configuration:
+                StackName: !Sub ${AWS::StackName}-Service
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_IAM
+                TemplatePath: BuildOutput::Service.yml
+                ParameterOverrides: !Sub |
+                  {
+                    "VpcId": "${VpcId}",
+                    "PrivateSubnetA": "${PrivateSubnetA}",
+                    "PrivateSubnetB": "${PrivateSubnetB}",
+                    "ExecutionRoleArn": "${ExecutionRoleArn}",
+                    "TaskRoleArn": "${TaskRoleArn}",
+                    "AutoScalingRoleArn": "${AutoScalingRoleArn}",
+                    "ClusterName": "${ClusterName}",
+                    "ECSSecurityGroup": "${ECSSecurityGroup}",
+                    "LogGroup": "${ServiceLogs}",
+                    "Image": { "Fn::GetParam" : ["image", "imageDetail.json", "ImageURI"]},
+                    "Tag": { "Fn::GetParam" : ["image", "imageDetail.json", "Tag"]}
+                  }
+              InputArtifacts:
+                - Name: BuildOutput
+              RunOrder: 1
