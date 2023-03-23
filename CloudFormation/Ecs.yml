@@ -68,5 +68,7 @@ Resources:
         - !Ref PublicSubnet2
 
 Outputs:
+  ClusterName:
+    Value: !Ref Cluster
   ECSSecurityGroup:
     Value: !Ref ECSSecurityGroup

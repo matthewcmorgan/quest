@@ -73,3 +73,11 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: '*'
+
+Outputs:
+  ExecutionRoleArn:
+    Value: !GetAtt ExecutionRole.Arn
+  TaskRoleArn:
+    Value: !GetAtt TaskRole.Arn
+  AutoScalingRoleArn:
+    Value: !GetAtt AutoScalingRole.Arn
