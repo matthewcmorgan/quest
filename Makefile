@@ -31,7 +31,7 @@ clean:
 	docker rm -f `docker ps -aq` || exit 0
 
 deploy: package
-	aws cloudformation deploy --template-file packaged.yml --stack-name mmorgan-ecs-test --capabilities CAPABILITY_NAMED_IAM
+	aws cloudformation deploy --template-file packaged.yml --stack-name mmorgan-ecs-test --capabilities CAPABILITY_NAMED_IAM --disable-rollback
 
 package:
 	aws cloudformation package --template-file CloudFormation/Infra.yml --s3-bucket matthew.morgan.bucket --output-template-file packaged.yml

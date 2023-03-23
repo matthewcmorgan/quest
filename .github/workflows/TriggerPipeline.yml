@@ -23,8 +23,7 @@ jobs:
       - name: Deploy Persistent Infrastructure
         uses: aws-actions/aws-cloudformation-action@v1
         with:
-          stack-name: persistent-infra-stack
-          template: ./persistent-infra/persistent-infra.yml
-          stack-policy: ./persistent-infra/stack-policy.json
+          stack-name: mcm-ghactions-ecs-stack
+          template: ./Cloudformation/Infra.yml
           capabilities: CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
           region: us-west-2
