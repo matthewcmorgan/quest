@@ -4,6 +4,10 @@ Parameters:
   ServiceName:
     Type: String
     Default: mcm-quest-service
+  GitHubToken:
+    Description: 'Personal Access Token for authenticating to GitHub'
+    Type: 'String'
+    NoEcho: true
 
 Resources:
   Vpc:
@@ -57,3 +61,4 @@ Resources:
         ServiceName: !Ref ServiceName
         ECSSecurityGroup: !GetAtt Ecs.Outputs.ECSSecurityGroup
         ServiceLogs: !Ref ServiceLogs
+        GitHubToken: !Ref GitHubToken

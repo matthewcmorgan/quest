@@ -9,6 +9,7 @@ IMAGE_NAME := $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(ECR_REPO_N
 CONTAINER_NAME := mmorgan-ecs-test
 LOAD_BALANCER_NAME := mmorgan-ecs-test
 CERTIFICATE_ARN := <arn_of_your_tls_certificate>
+GH_TOKEN := $(GITHUB_ACCESS_TOKEN)
 
 .PHONY: all build tag push configure-cluster create-repository create-task register-service create-target-group
 
@@ -31,7 +32,7 @@ clean:
 	docker rm -f `docker ps -aq` || exit 0
 
 deploy: package
-	aws cloudformation deploy --template-file packaged.yml --stack-name mmorgan-ecs-test --capabilities CAPABILITY_NAMED_IAM --disable-rollback
+	aws cloudformation deploy --template-file packaged.yml --stack-name mmorgan-ecs-test --capabilities CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides GitHubToken=$(GH_TOKEN)
 
 package:
 	aws cloudformation package --template-file CloudFormation/Infra.yml --s3-bucket matthew.morgan.bucket --output-template-file packaged.yml

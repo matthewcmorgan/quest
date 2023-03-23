@@ -1,9 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Builds Roles for Stack
 Parameters:
-  GitHubTokenName:
-    Type: String
-    Default: GITHUB_ACCESS_TOKEN
+  GitHubToken:
+    Description: 'Personal Access Token for authenticating to GitHub'
+    Type: 'String'
+    NoEcho: true
   GitHubRepositoryName:
     Type: String
     Default: quest
@@ -55,7 +56,7 @@ Resources:
             Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ServiceName}
       Source:
         Type: CODEPIPELINE
-        BuildSpec: buildspec.yml
+        BuildSpec: CloudFormation/buildspec.yml
       TimeoutInMinutes: 15
 
   CodeBuildRole:
@@ -84,7 +85,7 @@ Resources:
               Service:
                 - codepipeline.amazonaws.com
               AWS:
-                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
+                - !Sub ${AWS::AccountId}
             Action:
               - sts:AssumeRole
       Path: "/"
@@ -105,6 +106,10 @@ Resources:
                 Action:
                   - s3:PutObject
                 Resource: !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}/*
+              - Effect: Allow
+                Action:
+                  - codebuild:Startbuild
+                Resource: !GetAtt CodeBuildProject.Arn
 
   CodePipelineS3Bucket:
     Type: AWS::S3::Bucket
@@ -135,6 +140,8 @@ Resources:
               - !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}
 
   CodePipeline:
+    DependsOn:
+      - GitHubTokenSecret
     Type: AWS::CodePipeline::Pipeline
     Properties:
       RoleArn: !GetAtt CodePipelineServiceRole.Arn
@@ -154,7 +161,7 @@ Resources:
                 Owner: !Ref GitHubOwner
                 Repo: !Ref GitHubRepositoryName
                 Branch: !Ref GitHubBranch
-                OAuthToken: !Ref GitHubTokenName
+                OAuthToken: '{{resolve:secretsmanager:github-token-secret:SecretString:token}}'
                 PollForSourceChanges: false
               OutputArtifacts:
                 - Name: SourceArtifact
@@ -204,3 +211,13 @@ Resources:
               InputArtifacts:
                 - Name: BuildOutput
               RunOrder: 1
+  # Must be updated after creation to correct value
+  GitHubTokenSecret:
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: PAT for Github Access
+      Name: github-token-secret
+      SecretString: !Sub '{"token":"${GitHubToken}"}'
+
