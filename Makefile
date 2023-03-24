@@ -50,8 +50,10 @@ destroy:
 diagram:
 	mkdir -p diagram
 	npm install -g @mhlabs/cfn-diagram-ci --no-save
-	cfn-diagram-ci draw.io -t "CloudFormation/Infra.yml" -o "./diagram/diagram.drawio"
-	cfn-diagram-ci html -t "CloudFormation/Infra.yml" -o  "./diagram/cfn-diagram.png"
+	cd CloudFormation
+	cfn-diagram-ci draw.io -t "Infra.yml" -o "./diagram/diagram.drawio"
+	cfn-diagram-ci html -t "Infra.yml" -o  "./diagram/cfn-diagram.png"
+	cd -
 
 ###
 # HERE BE DRAGONS! GO FORTH WITH CAUTION!

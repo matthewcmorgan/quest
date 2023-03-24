@@ -8,7 +8,8 @@ RUN npm install -g npm \
     && npm install . \
     && npm prune --omit=dev --omit=optional \
     && npm cache clean --force
-COPY --chmod=0744 config/make_dummy_cert.sh /etc/pki/tls/certs/make-dummy-cert
+COPY config/make_dummy_cert.sh /etc/pki/tls/certs/make-dummy-cert
+RUN chmod +x /etc/pki/tls/certs/make-dummy-cert
 
 FROM nginx:stable-alpine as final
 RUN apk add --no-cache nodejs openssl
