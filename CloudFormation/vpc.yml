@@ -194,6 +194,15 @@ Resources:
       SubnetId: !Ref PublicSubnet2
       NetworkAclId: !Ref PublicNetworkAcl
 
+  PrivateSubnetS3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Gateway
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref VPC
+      RouteTableIds:
+        - !Ref PrivateRouteTable
+
 Outputs:
   VpcId:
     Value: !Ref VPC
