@@ -118,14 +118,14 @@ Resources:
       AllocationId: !GetAtt NatEip2.AllocationId
       SubnetId: !Ref PublicSubnet2
 
-  PrivateSubnet1RouteTableAssociation:
+  PrivateSubnetARouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     DependsOn: NatGateway1
     Properties:
       RouteTableId: !Ref RouteTablePrivateA
       SubnetId: !Ref PrivateSubnetA
 
-  PrivateSubnet2RouteTableAssociation:
+  PrivateSubnetBRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     DependsOn: NatGateway2
     Properties:

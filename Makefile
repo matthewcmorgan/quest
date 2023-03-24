@@ -1,3 +1,7 @@
+#!/usr/bin/make -f
+# dependencies may be required - 
+# docker, @mhlabs/cfn-diagram-ci, aws-cli, nodejs, npm
+
 AWS_ACCOUNT_ID := 324320755747
 AWS_REGION := us-west-2
 ECR_REPO_NAME := mmorgan-ecs-test
@@ -42,6 +46,11 @@ validate: package
 
 destroy:
 	aws cloudformation delete-stack --stack-name mmorgan-ecs-test
+
+diagram: package
+	mkdir -p diagram
+	cfn-diagram-ci draw.io -t "packaged.yml" -o "./diagram/diagram.drawio"
+	cfn-diagram-ci html -t "packaged.yml" -o  "./diagram/cfn-diagram.png"
 
 ###
 # HERE BE DRAGONS! GO FORTH WITH CAUTION!

@@ -14,7 +14,7 @@ phases:
       - pip install --upgrade pip checkov --quiet
 
       # Install Trivy
-      - TRIVY_VERSION=$(curl -fsSL "https://api.github.com/repos/auqusecurity/trivy/releases/latest" | jq -r '.tag_name' | cut -c2-)
+      - TRIVY_VERSION=$(curl -fsSL "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | jq -r '.tag_name' | cut -c2-)
       - rpm -ivh https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.rpm
 
       # Install Cosign
