@@ -36,6 +36,16 @@ Parameters:
     Type: String
 
 Resources:
+  CodeBuildSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable Egress traffic for codebuild
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: "-1"
+          Description: Allow egress of anytype to anywhere
+      VpcId: !Sub "${VpcId}"
+  
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -54,6 +64,13 @@ Resources:
             Value: !Ref AWS::AccountId
           - Name: REPOSITORY_URI
             Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ServiceName}
+        VpcConfig:
+        SecurityGroupIds:
+          - !Ref CodeBuildSecurityGroup
+        Subnets:
+          - !Sub "${PrivateSubnetA}"
+          - !Sub "${PrivateSubnetB}"
+        VpcId: !Sub "${VpcId}"
       Source:
         Type: CODEPIPELINE
         BuildSpec: CloudFormation/buildspec.yml
