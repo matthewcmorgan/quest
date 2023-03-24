@@ -206,11 +206,12 @@ Resources:
   PrivateSubnetLogsEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
-      VpcEndpointType: Gateway
+      VpcEndpointType: Interface
       ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
       VpcId: !Ref VPC
-      RouteTableIds:
-        - !Ref PrivateRouteTable
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
 
 Outputs:
   VpcId:

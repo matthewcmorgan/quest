@@ -122,6 +122,7 @@ Resources:
                   - ecs:*
                   - s3:*
                   - logs:*
+                  - ecr:*
                 Resource: '*'
 
   CodePipelineS3Bucket:
