@@ -64,7 +64,7 @@ Resources:
             Value: !Ref AWS::AccountId
           - Name: REPOSITORY_URI
             Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ServiceName}
-        VpcConfig:
+      VpcConfig:
         SecurityGroupIds:
           - !Ref CodeBuildSecurityGroup
         Subnets:
