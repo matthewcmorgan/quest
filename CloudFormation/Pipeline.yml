@@ -90,6 +90,7 @@ Resources:
             Principal:
               Service:
                 - codepipeline.amazonaws.com
+                - codebuild.amazonaws.com
               AWS:
                 - !Sub ${AWS::AccountId}
             Action:
@@ -116,7 +117,7 @@ Resources:
                 Action:
                   - codebuild:Startbuild
                   - codebuild:BatchGetBuilds
-                Resource: !GetAtt CodeBuildProject.Arn
+                Resource: '*'
 
   CodePipelineS3Bucket:
     UpdateReplacePolicy: Retain
