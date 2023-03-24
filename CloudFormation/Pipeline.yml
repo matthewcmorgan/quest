@@ -50,7 +50,7 @@ Resources:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Ref ServiceName
-      ServiceRole: !GetAtt CodeBuildRole.Arn
+      ServiceRole: !GetAtt CodePipelineServiceRole.Arn
       Artifacts:
         Type: CODEPIPELINE
       Environment:
@@ -72,28 +72,17 @@ Resources:
           - !Sub "${PrivateSubnetB}"
         VpcId: !Sub "${VpcId}"
       Source:
-        Type: CODEPIPELINE
         BuildSpec: CloudFormation/buildspec.yml
+        Type: CODEPIPELINE
       TimeoutInMinutes: 15
-
-  CodeBuildRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: codebuild.amazonaws.com
-            Action: sts:AssumeRole
-        Version: '2012-10-17'
-      ManagedPolicyArns:
-        # More than necessary
-        - !Sub arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess
 
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub ${AWS::StackName}-codepipeline-service-role
+      ManagedPolicyArns:
+        # More than necessary
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -162,7 +151,7 @@ Resources:
           - Effect: Allow
             Principal:
               AWS:
-                - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
+                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
             Action:
               - s3:GetObject
               - s3:GetObjectAcl
@@ -175,7 +164,7 @@ Resources:
           - Effect: Allow
             Principal:
               AWS:
-                - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
+                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
             Action:
               - s3:ListBucket
             Resource: !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}
@@ -254,6 +243,7 @@ Resources:
                 - Name: SourceArtifact
               OutputArtifacts:
                 - Name: BuildOutput
+              RoleArn: !GetAtt CodePipelineServiceRole.Arn
               RunOrder: 1
         - Name: Deploy
           Actions:
@@ -284,6 +274,7 @@ Resources:
                   }
               InputArtifacts:
                 - Name: BuildOutput
+              RoleArn: !GetAtt CodePipelineServiceRole.Arn
               RunOrder: 1
 
 # Must be updated after creation to correct value (or passed on the cli as a parameter-override)
