@@ -130,6 +130,8 @@ Resources:
                 Resource: !GetAtt CodeBuildProject.Arn
 
   CodePipelineS3Bucket:
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Delete
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub ${ServiceName}-artifacts
