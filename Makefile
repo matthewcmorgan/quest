@@ -17,7 +17,7 @@ GH_TOKEN := $(GITHUB_ACCESS_TOKEN)
 
 default: destroy deploy
 
-.PHONY: default destroy deploy all build tag push configure-cluster create-repository create-task register-service create-target-group
+.PHONY: default destroy deploy diagram all build tag push configure-cluster create-repository create-task register-service create-target-group
 
 all: build tag push configure-cluster create-repository create-task register-service create-target-group
 
@@ -47,10 +47,11 @@ validate: package
 destroy:
 	aws cloudformation delete-stack --stack-name mmorgan-ecs-test
 
-diagram: package
+diagram:
 	mkdir -p diagram
-	cfn-diagram-ci draw.io -t "packaged.yml" -o "./diagram/diagram.drawio"
-	cfn-diagram-ci html -t "packaged.yml" -o  "./diagram/cfn-diagram.png"
+	npm install -g @mhlabs/cfn-diagram-ci --no-save
+	cfn-diagram-ci draw.io -t "CloudFormation/Infra.yml" -o "./diagram/diagram.drawio"
+	cfn-diagram-ci html -t "CloudFormation/Infra.yml" -o  "./diagram/cfn-diagram.png"
 
 ###
 # HERE BE DRAGONS! GO FORTH WITH CAUTION!

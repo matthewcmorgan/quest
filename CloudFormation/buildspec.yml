@@ -29,7 +29,7 @@ phases:
       # Run Chekov against image
       - checkov --file Dockerfile --output junitxml --output cli --output-file-path results.xml,console
       # Build Image
-      - docker build -t ${IMAGE_URI} Dockerfile
+      - docker build -t ${IMAGE_URI} .
       # Trivy Scan  image
       - trivy image ${IMAGE_URI} --format cosign-vuln --output trivy.output
       - IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_URI})
