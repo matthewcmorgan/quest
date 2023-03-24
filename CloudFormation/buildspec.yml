@@ -26,11 +26,10 @@ phases:
       - echo Build started on `date`
       - IMAGE_REPO_NAME=quest-app
       - IMAGE_URI=$IMAGE_REPO_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
-      - DOCKER_FILE='../Dockerfile'
       # Run Chekov against image
-      - checkov --file Dockerfile --output junitxml --output cli --output-file-path console,results.xml 
+      - checkov --file Dockerfile --output junitxml --output cli --output-file-path results.xml,console
       # Build Image
-      - docker build -t ${IMAGE_URI} ${DOCKER_FILE}
+      - docker build -t ${IMAGE_URI} Dockerfile
       # Trivy Scan  image
       - trivy image ${IMAGE_URI} --format cosign-vuln --output trivy.output
       - IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_URI})
