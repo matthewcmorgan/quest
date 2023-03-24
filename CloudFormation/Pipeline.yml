@@ -2,8 +2,8 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Builds Roles for Stack
 Parameters:
   GitHubToken:
-    Description: 'Personal Access Token for authenticating to GitHub'
-    Type: 'String'
+    Description: Personal Access Token for authenticating to GitHub
+    Type: String
     NoEcho: true
   GitHubRepositoryName:
     Type: String
