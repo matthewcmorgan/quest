@@ -127,7 +127,8 @@ Resources:
       BucketName: !Sub ${ServiceName}-artifacts
       BucketEncryption:
         ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
+          - BucketKeyEnabled: true
+            ServerSideEncryptionByDefault:
               SSEAlgorithm: aws:kms
               KMSMasterKeyID: !Ref PipelineKey
       VersioningConfiguration:
@@ -152,7 +153,7 @@ Resources:
           - Effect: Allow
             Principal:
               AWS:
-                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
+                - !Sub ${AWS::AccountId}
             Action:
               - s3:GetObject
               - s3:GetObjectAcl
@@ -165,7 +166,7 @@ Resources:
           - Effect: Allow
             Principal:
               AWS:
-                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
+                - !Sub ${AWS::AccountId}
             Action:
               - s3:ListBucket
             Resource: !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}
@@ -182,7 +183,7 @@ Resources:
           - Effect: Allow
             Principal:
               AWS:
-                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
+                - !Sub ${AWS::AccountId}
             Action:
               - kms:*
             Resource: '*'
