@@ -11,11 +11,11 @@ LOAD_BALANCER_NAME := mmorgan-ecs-test
 CERTIFICATE_ARN := <arn_of_your_tls_certificate>
 GH_TOKEN := $(GITHUB_ACCESS_TOKEN)
 
-.PHONY: all build tag push configure-cluster create-repository create-task register-service create-target-group
+default: destroy deploy
+
+.PHONY: default destroy deploy all build tag push configure-cluster create-repository create-task register-service create-target-group
 
 all: build tag push configure-cluster create-repository create-task register-service create-target-group
-
-default: test destroy deploy
 
 run: 
 	docker logs --follow `docker run -itd -p 3000:3000 -p 80:80 local:test`
