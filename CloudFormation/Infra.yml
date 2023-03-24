@@ -54,6 +54,8 @@ Resources:
         VpcId: !GetAtt Vpc.Outputs.VpcId
         PrivateSubnetA: !GetAtt Vpc.Outputs.PrivateSubnetA
         PrivateSubnetB: !GetAtt Vpc.Outputs.PrivateSubnetB
+        PublicSubnet1: !GetAtt Vpc.Outputs.PublicSubnet1
+        PublicSubnet2: !GetAtt Vpc.Outputs.PublicSubnet2
         ExecutionRoleArn: !GetAtt Roles.Outputs.ExecutionRoleArn
         TaskRoleArn: !GetAtt Roles.Outputs.TaskRoleArn
         AutoScalingRoleArn: !GetAtt Roles.Outputs.AutoScalingRoleArn

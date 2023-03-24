@@ -20,6 +20,10 @@ Parameters:
     Type: String
   PrivateSubnetB:
     Type: String
+  PublicSubnet1:
+    Type: String
+  PublicSubnet2:
+    Type: String
   ExecutionRoleArn:
     Type: String
   TaskRoleArn:
@@ -68,8 +72,8 @@ Resources:
         SecurityGroupIds:
           - !Ref CodeBuildSecurityGroup
         Subnets:
-          - !Sub "${PrivateSubnetA}"
-          - !Sub "${PrivateSubnetB}"
+          - !Sub "${PublicSubnet1}"
+          - !Sub "${PublicSubnet2}"
         VpcId: !Sub "${VpcId}"
       Source:
         Type: CODEPIPELINE
