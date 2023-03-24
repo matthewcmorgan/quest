@@ -20,10 +20,6 @@ Parameters:
     Type: String
   PrivateSubnetB:
     Type: String
-  PublicSubnet1:
-    Type: String
-  PublicSubnet2:
-    Type: String
   ExecutionRoleArn:
     Type: String
   TaskRoleArn:
@@ -72,8 +68,8 @@ Resources:
         SecurityGroupIds:
           - !Ref CodeBuildSecurityGroup
         Subnets:
-          - !Sub "${PublicSubnet1}"
-          - !Sub "${PublicSubnet2}"
+          - !Sub "${PrivateSubnetA}"
+          - !Sub "${PrivateSubnetB}"
         VpcId: !Sub "${VpcId}"
       Source:
         Type: CODEPIPELINE
@@ -130,6 +126,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - codebuild:Startbuild
+                  - codebuild:BatchGetBuilds
                 Resource: !GetAtt CodeBuildProject.Arn
 
   CodePipelineS3Bucket:
@@ -232,7 +229,8 @@ Resources:
               InputArtifacts:
                 - Name: BuildOutput
               RunOrder: 1
-  # Must be updated after creation to correct value
+
+# Must be updated after creation to correct value (or passed on the cli as a parameter-override)
   GitHubTokenSecret:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
