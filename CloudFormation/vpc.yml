@@ -60,16 +60,21 @@ Resources:
   NATGateway1:
     Type: AWS::EC2::NatGateway
     Properties:
-      AllocationId: !GetAtt NATGatewayEIP.AllocationId
+      AllocationId: !GetAtt NATGateway1EIP.AllocationId
       SubnetId: !Ref PublicSubnet1
 
   NATGateway2:
     Type: AWS::EC2::NatGateway
     Properties:
-      AllocationId: !GetAtt NATGatewayEIP.AllocationId
+      AllocationId: !GetAtt NATGateway2EIP.AllocationId
       SubnetId: !Ref PublicSubnet2
 
-  NATGatewayEIP:
+  NATGateway1EIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NATGateway2EIP:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
