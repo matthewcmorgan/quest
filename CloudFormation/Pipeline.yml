@@ -50,7 +50,7 @@ Resources:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Ref ServiceName
-      ServiceRole: !GetAtt CodePipelineServiceRole.Arn
+      ServiceRole: !GetAtt CodeBuildRole.Arn
       Artifacts:
         Type: CODEPIPELINE
       Environment:
@@ -76,13 +76,54 @@ Resources:
         Type: CODEPIPELINE
       TimeoutInMinutes: 15
 
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+              AWS: !GetAtt CodePipelineServiceRole.Arn
+            Action: sts:AssumeRole
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+        # More than necessary
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess
+      Policies:
+        - PolicyName: CodeBuildServiceRole 
+          PolicyDocument: 
+            Version: '2012-10-17'
+            Statement:
+            - Sid: CloudWatchLogsPolicy
+              Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: "*"
+            - Sid: S3GetObjectPolicy
+              Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:GetObjectVersion
+              Resource: "*"
+            - Sid: S3PutObjectPolicy
+              Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource: "*"
+            - Sid: S3BucketIdentity
+              Effect: Allow
+              Action:
+                - s3:GetBucketAcl
+                - s3:GetBucketLocation
+              Resource: "*"
+
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub ${AWS::StackName}-codepipeline-service-role
-      ManagedPolicyArns:
-        # More than necessary
-        - !Sub arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -90,7 +131,6 @@ Resources:
             Principal:
               Service:
                 - codepipeline.amazonaws.com
-                - codebuild.amazonaws.com
               AWS:
                 - !Sub ${AWS::AccountId}
             Action:
@@ -116,13 +156,6 @@ Resources:
               - Effect: Allow
                 Action:
                   - codebuild:*
-                  - cloudwatch:*
-                  - codedeploy:*
-                  - autoscaling:*
-                  - ecs:*
-                  - s3:*
-                  - logs:*
-                  - ecr:*
                 Resource: '*'
 
   CodePipelineS3Bucket:
@@ -251,7 +284,7 @@ Resources:
                 - Name: SourceArtifact
               OutputArtifacts:
                 - Name: BuildOutput
-              RoleArn: !GetAtt CodePipelineServiceRole.Arn
+              RoleArn: !GetAtt CodeBuildRole.Arn
               RunOrder: 1
         - Name: Deploy
           Actions:
