@@ -95,7 +95,7 @@ Resources:
                 - !Sub ${AWS::AccountId}
             Action:
               - sts:AssumeRole
-      Path: "/"
+      Path: /
       Policies:
         - PolicyName: CodePipelineServiceRolePolicy
           PolicyDocument:
@@ -115,8 +115,13 @@ Resources:
                 Resource: !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}/*
               - Effect: Allow
                 Action:
-                  - codebuild:Startbuild
-                  - codebuild:BatchGetBuilds
+                  - codebuild:*
+                  - cloudwatch:*
+                  - codedeploy:*
+                  - autoscaling:*
+                  - ecs:*
+                  - s3:*
+                  - logs:*
                 Resource: '*'
 
   CodePipelineS3Bucket:

@@ -203,6 +203,15 @@ Resources:
       RouteTableIds:
         - !Ref PrivateRouteTable
 
+  PrivateSubnetLogsEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Gateway
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
+      VpcId: !Ref VPC
+      RouteTableIds:
+        - !Ref PrivateRouteTable
+
 Outputs:
   VpcId:
     Value: !Ref VPC
