@@ -45,7 +45,33 @@ Resources:
           IpProtocol: "-1"
           Description: Allow egress of anytype to anywhere
       VpcId: !Sub "${VpcId}"
-  
+
+# Must be updated after creation to correct value (or passed on the cli as a parameter-override)
+  GitHubTokenSecret:
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: PAT for Github Access
+      Name: github-token-secret
+      SecretString: !Sub '{"token":"${GitHubToken}"}'
+
+  GitHubWebhook:
+    DependsOn:
+      - GitHubTokenSecret
+    Type: AWS::CodePipeline::Webhook
+    Properties:
+      Authentication: GITHUB_HMAC
+      AuthenticationConfiguration:
+        SecretToken: '{{resolve:secretsmanager:github-token-secret:SecretString:token}}'
+      RegisterWithThirdParty: true
+      Filters:
+      - JsonPath: "$.ref"
+        MatchEquals: refs/heads/{Branch}
+      TargetPipeline: !Ref CodePipeline
+      TargetAction: Source
+      TargetPipelineVersion: !GetAtt CodePipeline.Version
+
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -318,14 +344,3 @@ Resources:
                 - Name: BuildOutput
               RoleArn: !GetAtt CodePipelineServiceRole.Arn
               RunOrder: 1
-
-# Must be updated after creation to correct value (or passed on the cli as a parameter-override)
-  GitHubTokenSecret:
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Delete
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Description: PAT for Github Access
-      Name: github-token-secret
-      SecretString: !Sub '{"token":"${GitHubToken}"}'
-
