@@ -38,9 +38,9 @@ phases:
       # Generate a keypair for signing and verify
       - cosign generate-key-pair --kms awskms:///${COSIGN_KEY_ARN}
       # Sign image
-      - cosign sign --tlog-upload --key awskms:///${COSIGN_KEY_ARN} ${IMAGE_DIGEST}
+      - cosign sign --insecure-ignore-tlog --key awskms:///${COSIGN_KEY_ARN} ${IMAGE_DIGEST}
       # Verify signature and claims with cosign
-      - cosign verify --insecure-ignore-tlog --key cosign.pub $REPOSITORY_URI:$IMAGE_TAG
+      - cosign verify --offline --key cosign.pub $REPOSITORY_URI:$IMAGE_TAG
 
       # Push signed Image to ECR
       - docker push ${REPOSITORY_URI}:${IMAGE_DIGEST}
