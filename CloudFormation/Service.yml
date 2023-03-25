@@ -9,7 +9,7 @@ Parameters:
   LogGroup:
     Description: Log group for service logging
     Type: String
-  ContainerSecurityGroup:
+  ECSSecurityGroup:
     Description: Security group to apply to containers
     Type: String
   AutoscalingMin:
@@ -59,7 +59,7 @@ Resources:
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
-            - !Ref ContainerSecurityGroup
+            - !Ref ECSSecurityGroup
           Subnets:
             - !Sub "${PrivateSubnetA}"
             - !Sub "${PrivateSubnetB}"
