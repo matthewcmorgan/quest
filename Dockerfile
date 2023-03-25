@@ -17,7 +17,6 @@ RUN apk add --no-cache nodejs openssl
 COPY --from=build /src /usr/share/nginx/html/src
 COPY --from=build /etc/pki/tls/certs/make-dummy-cert /etc/pki/tls/certs/make-dummy-cert
 COPY bin/ /usr/share/nginx/html/bin
-RUN /etc/pki/tls/certs/make-dummy-cert /etc/ssl/certs/nginx.crt /etc/ssl/certs/nginx.key /etc/nginx/dhparam.pem
 COPY config/nginx.conf /etc/nginx/conf.d/default.conf
 
 HEALTHCHECK CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1
