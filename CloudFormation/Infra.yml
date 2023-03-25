@@ -39,7 +39,7 @@ Resources:
     Properties:
       TemplateURL: "./Ecs.yml"
       Parameters:
-        ServiceName: !Ref ServiceName
+        ServiceName: !Sub ${ServiceName}
         Vpc: !GetAtt Vpc.Outputs.VpcId
         PublicSubnet1: !GetAtt Vpc.Outputs.PublicSubnet1
         PublicSubnet2: !GetAtt Vpc.Outputs.PublicSubnet2
@@ -56,7 +56,9 @@ Resources:
         PrivateSubnetB: !GetAtt Vpc.Outputs.PrivateSubnetB
         ExecutionRoleArn: !GetAtt Roles.Outputs.ExecutionRoleArn
         TaskRoleArn: !GetAtt Roles.Outputs.TaskRoleArn
+        TargetGroup: !GetAtt Ecs.Outputs.TargetGroup
         AutoScalingRoleArn: !GetAtt Roles.Outputs.AutoScalingRoleArn
+        AlbSecurityGroup: !GetAtt Ecs.Outputs.AlbSecurityGroup
         ClusterName: !GetAtt Ecs.Outputs.ClusterName
         ServiceName: !Ref ServiceName
         ECSSecurityGroup: !GetAtt Ecs.Outputs.ECSSecurityGroup

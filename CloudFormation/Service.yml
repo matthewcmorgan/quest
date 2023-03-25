@@ -12,6 +12,9 @@ Parameters:
   ECSSecurityGroup:
     Description: Security group to apply to containers
     Type: String
+  AlbSecurityGroup:
+    Description: Security group for the ALB
+    Type: String
   AutoscalingMin:
     Description: Minimum size of the AutoScaling Group
     Type: String
@@ -25,6 +28,9 @@ Parameters:
     Type: String
   TaskRoleArn:
     Description: ARN for role to create tasks in ECS
+    Type: String
+  TargetGroup:
+    Description: ARN for ALB Target group
     Type: String
   ExecutionRoleArn:
     Description: ARN for role to execute tasks in ECS
@@ -46,20 +52,17 @@ Resources:
       Cluster: !Ref ClusterName
       DesiredCount: 1
       PropagateTags: SERVICE
-      DeploymentController:
-        Type: ECS
-      DeploymentConfiguration:
-        DeploymentCircuitBreaker:
-          Enable: true
-          Rollback: false
-        MaximumPercent: 200
-        MinimumHealthyPercent: 100
       LaunchType: FARGATE
       TaskDefinition: !Ref TaskDefinition
+      LoadBalancers:
+        - ContainerName: !Sub ${AWS::StackName}
+          ContainerPort: 443
+          TargetGroupArn: !Ref TargetGroup
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
             - !Ref ECSSecurityGroup
+            - !Ref AlbSecurityGroup
           Subnets:
             - !Sub "${PrivateSubnetA}"
             - !Sub "${PrivateSubnetB}"
@@ -81,6 +84,13 @@ Resources:
           Essential: true
           Cpu: 1024
           Memory: 2048
+          PortMappings:
+            - Protocol: tcp
+              ContainerPort: 443
+            - Protocol: tcp
+              ContainerPort: 3000
+            - Protocol: tcp
+              ContainerPort: 80
           LogConfiguration:
             LogDriver: awslogs
             Options:

@@ -56,7 +56,7 @@ diagram:
 	cd -
 
 ###
-# HERE BE DRAGONS! GO FORTH WITH CAUTION!
+# HERE THERE BE DRAGONS! GO FORTH WITH CAUTION!
 # Manual steps to build resources instead of cloudformation
 # Build the Docker image.
 build:

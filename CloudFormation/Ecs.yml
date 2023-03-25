@@ -67,7 +67,32 @@ Resources:
         - !Ref PublicSubnet1
         - !Ref PublicSubnet2
 
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ${AWS::StackName}
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: /
+      HealthCheckPort: '443'
+      HealthCheckProtocol: HTTPS
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: "200"
+      Port: 443
+      Protocol: HTTPS
+      TargetType: ip
+      UnhealthyThresholdCount: 4
+      VpcId: !Sub "${Vpc}"
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: '10'
+
 Outputs:
+  TargetGroup:
+    Value: !Ref TargetGroup
+  AlbSecurityGroup:
+    Value: !Ref AlbSecurityGroup
   ClusterName:
     Value: !Ref Cluster
   ECSSecurityGroup:

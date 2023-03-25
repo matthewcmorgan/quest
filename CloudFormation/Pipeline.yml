@@ -383,6 +383,7 @@ Resources:
                     "ExecutionRoleArn": "${ExecutionRoleArn}",
                     "TaskRoleArn": "${TaskRoleArn}",
                     "AutoScalingRoleArn": "${AutoScalingRoleArn}",
+                    "AlbSecurityGroup": "${AlbSecurityGroup}",
                     "ClusterName": "${ClusterName}",
                     "ECSSecurityGroup": "${ECSSecurityGroup}",
                     "LogGroup": "${ServiceLogs}",
