@@ -35,13 +35,12 @@ phases:
       - trivy image ${IMAGE_URI} --format cosign-vuln --output trivy.output
       - docker push ${REPOSITORY_URI}:${IMAGE_TAG}
       - IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_URI})
-      # Experimental keyless signing with cosign
-      - cosign generate-key-pair --kms awskms:///alias/${AWS::StackName}
-      - cosign sign-blob trivy.output
-      - cosign sign-blob results.xml
-      - cosign sign ${IMAGE_DIGEST}
-      # Verify keyless signature with cosign
-      - cosign verify ${IMAGE_DIGEST}
+      # Generate a keypair for signing and verify
+      - cosign generate-key-pair --kms awskms:///${COSIGN_KEY_ARN}
+      # Sign image
+      - cosign sign --key awskms:///${COSIGN_KEY_ARN} ${IMAGE_DIGEST}
+      # Verify signature and claims with cosign
+      - cosign verify --key awskms:///${COSIGN_KEY_ARN} ${IMAGE_DIGEST}
 
       # Push signed Image to ECR
       - docker push ${REPOSITORY_URI}:${IMAGE_DIGEST}

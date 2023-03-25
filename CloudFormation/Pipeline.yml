@@ -239,38 +239,41 @@ Resources:
               - s3:ListBucket
             Resource: !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}
 
-  PipelineKey:
+  SigningKey:
     Type: AWS::KMS::Key
     Properties:
-      Description: Used to encrypt and decrypt pipeline data.
       Enabled: true
-      EnableKeyRotation: true
+      Description: Key for signing images with cosign
+      KeyUsage: SIGN_VERIFY
+      KeySpec: ECC_NIST_P521
+      MultiRegion: false
       KeyPolicy:
         Version: '2012-10-17'
         Statement:
-          - Effect: Allow
-            Principal:
-              AWS:
-                - !Sub ${AWS::AccountId}
-            Action:
-              - kms:*
-            Resource: '*'
-          - Effect: Deny
-            Principal: '*'
-            Action:
-              - kms:CreateGrant
-              - kms:ListGrants
-              - kms:RevokeGrant
-            Resource: '*'
-            Condition:
-              Bool:
-                kms:GrantIsForAWSResource: false
+        - Effect: Allow
+          Principal:
+            AWS:
+            - !Sub ${AWS::AccountId}
+          Action:
+            - kms:*
+          Resource: '*'
+        - Effect: Deny
+          Principal: '*'
+          Action:
+            - kms:DescribeKey
+            - kms:GetPublicKey
+            - kms:Sign
+            - kms:Verify
+          Resource: '*'
+          Condition:
+            Bool:
+              kms:GrantIsForAWSResource: false
 
-  PipelineKeyAlias:
+  SigningAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: !Sub alias/${AWS::StackName}
-      TargetKeyId: !Ref PipelineKey
+      AliasName: !Sub alias/${AWS::StackName}-key
+      TargetKeyId: !Ref SigningKey
 
   CodePipeline:
     DeletionPolicy: Delete
@@ -310,6 +313,10 @@ Resources:
                 Provider: CodeBuild
               Configuration:
                 ProjectName: !Ref CodeBuildProject
+                EnvironmentVariables: !Sub |
+                  [
+                    {"name": "COSIGN_KEY_ARN", "value": "arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:alias/{AWS::StackName}-key"}
+                  ]
               InputArtifacts:
                 - Name: SourceArtifact
               OutputArtifacts:
