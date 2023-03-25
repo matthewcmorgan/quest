@@ -190,6 +190,7 @@ Resources:
                   - codepipeline:*
                   - iam:PassRole
                   - ecs:*
+                  - ecr:*
                 Resource: '*'
 
   CodePipelineS3Bucket:
