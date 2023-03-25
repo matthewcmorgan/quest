@@ -57,13 +57,13 @@ Resources:
       SecretString: !Sub '{"token":"${GitHubToken}"}'
 
   GitHubWebhook:
-    DependsOn:
-      - GitHubTokenSecret
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Type: AWS::CodePipeline::Webhook
     Properties:
       Authentication: GITHUB_HMAC
       AuthenticationConfiguration:
-        SecretToken: '{{resolve:secretsmanager:github-token-secret:SecretString:token}}'
+        SecretToken: !Join [':', ['{{resolve:secretsmanager', !Ref GitHubTokenSecret, 'SecretString:token}}']]
       RegisterWithThirdParty: true
       Filters:
       - JsonPath: "$.ref"
@@ -73,6 +73,8 @@ Resources:
       TargetPipelineVersion: !GetAtt CodePipeline.Version
 
   CodeBuildProject:
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Ref ServiceName
@@ -271,8 +273,8 @@ Resources:
       TargetKeyId: !Ref PipelineKey
 
   CodePipeline:
-    DependsOn:
-      - GitHubTokenSecret
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Type: AWS::CodePipeline::Pipeline
     Properties:
       RoleArn: !GetAtt CodePipelineServiceRole.Arn
@@ -292,7 +294,7 @@ Resources:
                 Owner: !Ref GitHubOwner
                 Repo: !Ref GitHubRepositoryName
                 Branch: !Ref GitHubBranch
-                OAuthToken: '{{resolve:secretsmanager:github-token-secret:SecretString:token}}'
+                OAuthToken: !Join [':', ['{{resolve:secretsmanager', !Ref GitHubTokenSecret, 'SecretString:token}}']]
                 PollForSourceChanges: false
               OutputArtifacts:
                 - Name: SourceArtifact
