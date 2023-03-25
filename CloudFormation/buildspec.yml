@@ -36,8 +36,9 @@ phases:
       - docker push ${REPOSITORY_URI}:${IMAGE_TAG}
       - IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_URI})
       # Experimental keyless signing with cosign
-      - COSIGN_EXPERIMENTAL=1 cosign sign --payload trivy.output
-      - COSIGN_EXPERIMENTAL=1 cosign sign --payload results.xml
+      - COSIGN_EXPERIMENTAL=1 cosign generate-key-pair
+      - COSIGN_EXPERIMENTAL=1 cosign sign-blob trivy.output
+      - COSIGN_EXPERIMENTAL=1 cosign sign-blob results.xml
       - COSIGN_EXPERIMENTAL=1 cosign sign ${IMAGE_DIGEST}
       # Verify keyless signature with cosign
       - COSIGN_EXPERIMENTAL=1 cosign verify ${IMAGE_DIGEST}
