@@ -41,7 +41,7 @@ phases:
       - cosign sign --tlog-upload=false --yes --key awskms:///${COSIGN_KEY_ARN} ${IMAGE_DIGEST}
 
       # Push signed Image to ECR
-      - docker push ${REPOSITORY_URI}:${IMAGE_DIGEST}
+      - docker push ${IMAGE_DIGEST}
       - printf '{"ImageURI":"%s", "Tag":"%s"}' "$REPOSITORY_URI:$IMAGE_TAG" "$IMAGE_TAG" | tee imageDetail.json
 
 reports:
