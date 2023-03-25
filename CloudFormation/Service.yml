@@ -46,12 +46,12 @@ Resources:
       Cluster: !Ref ClusterName
       DesiredCount: 1
       PropagateTags: SERVICE
-      # DeploymentController:
-      #   Type: ECS
-      # DeploymentConfiguration:
-      #   DeploymentCircuitBreaker:
-      #     Enable: True
-      #     Rollback: True
+      DeploymentController:
+        Type: ECS
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: false
         MaximumPercent: 200
         MinimumHealthyPercent: 100
       LaunchType: FARGATE
