@@ -348,7 +348,7 @@ Resources:
                 ProjectName: !Ref CodeBuildProject
                 EnvironmentVariables: !Sub |
                   [
-                    {"name": "COSIGN_KEY_ARN", "value": "arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:alias/{AWS::StackName}-key"}
+                    {"name": "COSIGN_KEY_ARN", "value": "arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:alias/${AWS::StackName}-key"}
                   ]
               InputArtifacts:
                 - Name: SourceArtifact
