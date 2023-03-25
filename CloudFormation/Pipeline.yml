@@ -383,8 +383,8 @@ Resources:
                     "ClusterName": "${ClusterName}",
                     "ECSSecurityGroup": "${ECSSecurityGroup}",
                     "LogGroup": "${ServiceLogs}",
-                    "Image": { "Fn::GetParam" : ["image", "imageDetail.json", "ImageURI"]},
-                    "Tag": { "Fn::GetParam" : ["image", "imageDetail.json", "Tag"]}
+                    "Image": { "Fn::GetParam" : ["BuildOutput", "imageDetail.json", "ImageURI"]},
+                    "Tag": { "Fn::GetParam" : ["BuildOutput", "imageDetail.json", "Tag"]}
                   }
               InputArtifacts:
                 - Name: BuildOutput
