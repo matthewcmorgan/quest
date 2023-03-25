@@ -282,7 +282,7 @@ Resources:
       Stages:
         - Name: Source
           Actions:
-            - Name: SourceAction
+            - Name: Source
               ActionTypeId:
                 Category: Source
                 Owner: ThirdParty
@@ -299,7 +299,7 @@ Resources:
               RunOrder: 1
         - Name: Build
           Actions:
-            - Name: BuildAction
+            - Name: Build
               ActionTypeId:
                 Category: Build
                 Owner: AWS
@@ -315,7 +315,7 @@ Resources:
               RunOrder: 1
         - Name: Deploy
           Actions:
-            - Name: DeployAction
+            - Name: Deploy
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS

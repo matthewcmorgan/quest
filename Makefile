@@ -13,7 +13,7 @@ IMAGE_NAME := $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(ECR_REPO_N
 CONTAINER_NAME := mmorgan-ecs-test
 LOAD_BALANCER_NAME := mmorgan-ecs-test
 CERTIFICATE_ARN := <arn_of_your_tls_certificate>
-GH_TOKEN := $(GITHUB_ACCESS_TOKEN)
+GH_TOKEN := $(GITHUB_PAT)
 
 default: destroy deploy
 
