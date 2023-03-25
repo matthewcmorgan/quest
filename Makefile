@@ -48,11 +48,11 @@ destroy:
 	aws cloudformation delete-stack --stack-name mmorgan-ecs-test
 
 diagram:
-	mkdir -p diagram
-	npm install -g @mhlabs/cfn-diagram-ci --no-save
-	cd CloudFormation
-	cfn-diagram-ci draw.io -t "Infra.yml" -o "./diagram/diagram.drawio"
-	cfn-diagram-ci html -t "Infra.yml" -o  "./diagram/cfn-diagram.png"
+	mkdir -p diagram && \
+	npm install -g @mhlabs/cfn-diagram-ci --no-save && \
+	cd CloudFormation && \
+	cfn-diagram-ci draw.io -t Infra.yml -o "../diagram/diagram.drawio" && \
+	cfn-diagram-ci html -t Infra.yml -all -o "../diagram/" && \
 	cd -
 
 ###
