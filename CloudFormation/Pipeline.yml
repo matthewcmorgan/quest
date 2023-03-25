@@ -369,6 +369,7 @@ Resources:
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM
                 TemplatePath: BuildOutput::Service.yml
+                RoleArn: !GetAtt CodePipelineServiceRole.Arn
                 ParameterOverrides: !Sub |
                   {
                     "VpcId": "${VpcId}",
@@ -385,5 +386,4 @@ Resources:
                   }
               InputArtifacts:
                 - Name: BuildOutput
-              RoleArn: !GetAtt CodePipelineServiceRole.Arn
               RunOrder: 1
