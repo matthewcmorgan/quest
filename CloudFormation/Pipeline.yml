@@ -185,6 +185,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - codebuild:*
+                  - cloudformation:*
                 Resource: '*'
 
   CodePipelineS3Bucket:
