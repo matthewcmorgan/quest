@@ -275,6 +275,39 @@ Resources:
       AliasName: !Sub alias/${AWS::StackName}-key
       TargetKeyId: !Ref SigningKey
 
+  PipelineKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Used to encrypt and decrypt pipeline data.
+      Enabled: true
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Sub ${AWS::AccountId}
+            Action:
+              - kms:*
+            Resource: '*'
+          - Effect: Deny
+            Principal: '*'
+            Action:
+              - kms:CreateGrant
+              - kms:ListGrants
+              - kms:RevokeGrant
+            Resource: '*'
+            Condition:
+              Bool:
+                kms:GrantIsForAWSResource: false
+
+  PipelineKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/${AWS::StackName}
+      TargetKeyId: !Ref PipelineKey
+
   CodePipeline:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
