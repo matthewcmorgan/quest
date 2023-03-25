@@ -189,8 +189,7 @@ Resources:
                   - cloudformation:*
                   - codepipeline:*
                   - iam:PassRole
-                  - ecs:RegisterTaskDefinition
-                  - ecs:CreateService
+                  - ecs:*
                 Resource: '*'
 
   CodePipelineS3Bucket:
