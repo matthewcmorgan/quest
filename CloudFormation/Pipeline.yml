@@ -370,7 +370,7 @@ Resources:
                 StackName: !Sub ${AWS::StackName}-Service
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM
-                TemplatePath: BuildOutput::Service.yml
+                TemplatePath: BuildOutput::CloudFormation/Service.yml
                 RoleArn: !GetAtt CodePipelineServiceRole.Arn
                 ParameterOverrides: !Sub |
                   {
