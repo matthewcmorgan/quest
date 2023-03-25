@@ -281,6 +281,7 @@ Resources:
       ArtifactStore:
         Location: !Ref CodePipelineS3Bucket
         Type: S3
+      RestartExecutionOnUpdate: true
       Stages:
         - Name: Source
           Actions:
