@@ -36,7 +36,7 @@ phases:
       - docker push ${REPOSITORY_URI}:${IMAGE_TAG}
       - IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_URI})
       # Generate a keypair for signing and verify
-      - cosign generate-key-pair --yes --kms awskms:///${COSIGN_KEY_ARN}
+      - cosign generate-key-pair --kms awskms:///${COSIGN_KEY_ARN}
       # Sign image
       - cosign sign --tlog-upload=false --yes --key awskms:///${COSIGN_KEY_ARN} ${IMAGE_DIGEST}
       # Verify signature and claims with cosign
