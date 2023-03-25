@@ -376,7 +376,6 @@ Resources:
                 RoleArn: !GetAtt CodePipelineServiceRole.Arn
                 ParameterOverrides: !Sub |
                   {
-                    "VpcId": "${VpcId}",
                     "PrivateSubnetA": "${PrivateSubnetA}",
                     "PrivateSubnetB": "${PrivateSubnetB}",
                     "ExecutionRoleArn": "${ExecutionRoleArn}",
