@@ -73,14 +73,14 @@ Resources:
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
-      Cpu: '256'
-      Memory: '512'
+      Cpu: '1024'
+      Memory: '2048'
       ContainerDefinitions:
         - Name: !Sub ${AWS::StackName}
           Image: !Ref Image
           Essential: true
-          Cpu: 256
-          Memory: 512
+          Cpu: 1024
+          Memory: 2048
           LogConfiguration:
             LogDriver: awslogs
             Options:
