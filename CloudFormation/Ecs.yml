@@ -59,7 +59,6 @@ Resources:
   ApplicationLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: !Ref ServiceName
       Scheme: internal
       SecurityGroups:
         - !Ref AlbSecurityGroup
@@ -70,7 +69,6 @@ Resources:
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: !Sub ${AWS::StackName}
       HealthCheckIntervalSeconds: 5
       HealthCheckPath: /
       HealthCheckPort: '443'
