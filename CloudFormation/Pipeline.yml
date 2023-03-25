@@ -187,6 +187,8 @@ Resources:
                 Action:
                   - codebuild:*
                   - cloudformation:*
+                  - codepipeline:*
+                  - iam:PassRole
                 Resource: '*'
 
   CodePipelineS3Bucket:
