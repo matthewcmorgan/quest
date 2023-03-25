@@ -160,6 +160,7 @@ Resources:
             Principal:
               Service:
                 - codepipeline.amazonaws.com
+                - cloudformation.amazonaws.com
               AWS:
                 - !Sub ${AWS::AccountId}
             Action:
@@ -387,4 +388,5 @@ Resources:
                   }
               InputArtifacts:
                 - Name: BuildOutput
+              RoleArn: !GetAtt CodePipelineServiceRole.Arn
               RunOrder: 1
