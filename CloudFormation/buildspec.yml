@@ -25,24 +25,25 @@ phases:
     commands:
       - echo Build started on `date`
       - IMAGE_REPO_NAME=quest-app
+      - IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION
       - IMAGE_URI=$IMAGE_REPO_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
       # Run Chekov against image
       - checkov --file Dockerfile --output junitxml --output cli --output-file-path results.xml,console
       # Build Image
-      - docker build -t ${IMAGE_URI} .
+      - docker build -t ${REPOSITORY_URI}/${IMAGE_URI} .
       # Trivy Scan  image
       - trivy image ${IMAGE_URI} --format cosign-vuln --output trivy.output
-      - docker push ${REPOSITORY_URI}:${IMAGE_URI}
+      - docker push ${REPOSITORY_URI}/${IMAGE_URI}
       - IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_URI})
       # Experimental keyless signing with cosign
       - COSIGN_EXPERIMENTAL=1 cosign sign --payload trivy.output
       - COSIGN_EXPERIMENTAL=1 cosign sign --payload results.xml
-      - COSIGN_EXPERIMENTAL=1 cosign sign ${IMAGE_URI_DIGEST}
+      - COSIGN_EXPERIMENTAL=1 cosign sign ${IMAGE_DIGEST}
       # Verify keyless signature with cosign
-      - COSIGN_EXPERIMENTAL=1 cosign verify ${IMAGE_URI_DIGEST}
+      - COSIGN_EXPERIMENTAL=1 cosign verify ${IMAGE_DIGEST}
 
       # Push signed Image to ECR
-      - docker push ${REPOSITORY_URI}:${IMAGE_URI_DIGEST}
+      - docker push ${REPOSITORY_URI}:${IMAGE_DIGEST}
       - printf '{"ImageURI":"%s", "Tag":"%s"}' "$REPOSITORY_URI:$IMAGE_TAG" "$IMAGE_TAG" | tee imageDetail.json
 
 reports:
