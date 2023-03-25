@@ -32,7 +32,7 @@ phases:
       # Build Image
       - docker build -t ${REPOSITORY_URI}/${IMAGE_URI} .
       # Trivy Scan  image
-      - trivy image {REPOSITORY_URI}/${IMAGE_URI} --format cosign-vuln --output trivy.output
+      - trivy image ${REPOSITORY_URI}/${IMAGE_URI} --format cosign-vuln --output trivy.output
       - docker push ${REPOSITORY_URI}/${IMAGE_URI}
       - IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_URI})
       # Experimental keyless signing with cosign
