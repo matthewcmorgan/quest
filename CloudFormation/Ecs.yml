@@ -101,6 +101,8 @@ Resources:
      Port: 443
 
   TargetGroup:
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckIntervalSeconds: 5
