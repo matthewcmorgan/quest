@@ -90,7 +90,6 @@ Resources:
            StatusCode: HTTP_301
      LoadBalancerArn: !Ref ApplicationLoadBalancer
      Port: 80
-     Protocol: HTTP
 
   HTTPSListener:
    Type: AWS::ElasticLoadBalancingV2::Listener
@@ -100,7 +99,6 @@ Resources:
           TargetGroupArn: !Ref TargetGroup
      LoadBalancerArn: !Ref ApplicationLoadBalancer
      Port: 443
-     Protocol: HTTP
 
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -114,7 +112,6 @@ Resources:
       Matcher:
         HttpCode: "200"
       Port: 443
-      Protocol: HTTPS
       TargetType: ip
       UnhealthyThresholdCount: 4
       VpcId: !Sub "${Vpc}"

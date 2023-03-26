@@ -21,7 +21,7 @@ COPY --from=build /src /usr/share/nginx/html/src
 COPY --from=build /etc/ssl/certs /etc/ssl/certs
 COPY --from=build /etc/nginx/dhparam.pem /etc/nginx/dhparam.pem
 RUN chmod -R nginx:nginx /var/cache/nginx/
-EXPOSE 80 3000
+EXPOSE 80 443 3000
 USER nginx
 WORKDIR /usr/share/nginx/html
 CMD ["sh", "-c", "nginx -g 'daemon off;'; node src/000.js"]
