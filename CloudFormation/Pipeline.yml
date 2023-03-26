@@ -196,6 +196,7 @@ Resources:
                   - ecs:*
                   - ecr:*
                   - application-autoscaling:*
+                  - cloudwatch:*
                 Resource: '*'
 
   CodePipelineS3Bucket:

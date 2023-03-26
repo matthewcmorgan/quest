@@ -24,5 +24,5 @@ COPY --from=build /etc/nginx/dhparam.pem /etc/nginx/dhparam.pem
 EXPOSE 80 3000
 USER nginx
 WORKDIR /usr/share/nginx/html
-CMD ["sh", "-c", "node src/000.js && nginx -g 'daemon off;'"]
+CMD ["sh", "-c", "nginx -g 'daemon off;'; node src/000.js"]
 HEALTHCHECK CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1
