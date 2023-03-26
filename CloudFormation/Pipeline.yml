@@ -195,6 +195,7 @@ Resources:
                   - iam:PassRole
                   - ecs:*
                   - ecr:*
+                  - application-autoscaling:*
                 Resource: '*'
 
   CodePipelineS3Bucket:
