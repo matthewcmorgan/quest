@@ -26,6 +26,11 @@ Resources:
           ToPort: 443
           Description: Allow ingress on 443 from Alb
           SourceSecurityGroupId: !Ref AlbSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          Description: Allow ingress on 443 from Alb
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
 
   Repository:
     Type: AWS::ECR::Repository
@@ -51,6 +56,11 @@ Resources:
           IpProtocol: "-1"
       SecurityGroupIngress:
         - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          Description: Allow inbound TCP traffic on 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
           Description: Allow inbound TCP traffic on 443
@@ -65,6 +75,32 @@ Resources:
       Subnets:
         - !Ref PublicSubnet1
         - !Ref PublicSubnet2
+
+  HTTPlistener:
+   Type: AWS::ElasticLoadBalancingV2::Listener
+   Properties:
+     DefaultActions:
+       - Type: redirect
+         RedirectConfig:
+           Protocol: HTTPS
+           Port: "443"
+           Host: "#{host}"
+           Path: "/#{path}"
+           Query: "#{query}"
+           StatusCode: HTTP_301
+     LoadBalancerArn: !Ref ApplicationLoadBalancer
+     Port: 80
+     Protocol: HTTP
+
+  HTTPSListener:
+   Type: AWS::ElasticLoadBalancingV2::Listener
+   Properties:
+     DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+     LoadBalancerArn: !Ref ApplicationLoadBalancer
+     Port: 443
+     Protocol: HTTP
 
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
