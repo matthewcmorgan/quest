@@ -20,7 +20,7 @@ COPY config/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /src /usr/share/nginx/html/src
 COPY --from=build /etc/ssl/certs /etc/ssl/certs
 COPY --from=build /etc/nginx/dhparam.pem /etc/nginx/dhparam.pem
-
+RUN chmod -R nginx:nginx /var/cache/nginx/
 EXPOSE 80 3000
 USER nginx
 WORKDIR /usr/share/nginx/html
