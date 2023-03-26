@@ -10,15 +10,16 @@ RUN npm install -g npm \
     && npm cache clean --force
 COPY config/make_dummy_cert.sh /etc/pki/tls/certs/make-dummy-cert
 RUN chmod +x /etc/pki/tls/certs/make-dummy-cert
+RUN /etc/pki/tls/certs/make-dummy-cert /etc/ssl/certs/nginx.crt /etc/ssl/certs/nginx.key /etc/nginx/dhparam.pem
 
 FROM nginx:stable-alpine as final
 RUN apk add --no-cache nodejs openssl
 
 COPY --from=build /src /usr/share/nginx/html/src
-COPY --from=build /etc/pki/tls/certs/make-dummy-cert /etc/pki/tls/certs/make-dummy-cert
+COPY --from=build /etc/ssl/certs /etc/ssl/certs
+COPY --from=build /etc/nginx/dhparam.pem /etc/nginx/dhparam.pem
 COPY bin/ /usr/share/nginx/html/bin
 COPY config/nginx.conf /etc/nginx/conf.d/default.conf
-RUN /etc/pki/tls/certs/make-dummy-cert /etc/ssl/certs/nginx.crt /etc/ssl/certs/nginx.key /etc/nginx/dhparam.pem
 
 HEALTHCHECK CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1
 WORKDIR /usr/share/nginx/html
