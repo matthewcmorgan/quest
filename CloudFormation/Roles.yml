@@ -39,7 +39,7 @@ Resources:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
-                Action: [ecr:GetAuthorizationToken]
+                Action: [ecr:*]
                 Resource: '*'
               - Effect: Allow
                 Action:
@@ -66,7 +66,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - ecr:GetAuthorizationToken
+                  - ecr:*
                   - ecr:BatchCheckLayerAvailability
                   - ecr:GetDownloadUrlForResource
                   - ecr:BatchGetImage
