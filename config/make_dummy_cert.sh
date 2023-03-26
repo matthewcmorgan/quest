@@ -25,7 +25,7 @@ PEM3=$(/bin/mktemp /tmp/openssl.XXXXXX)
 trap 'rm -f ${PEM1} ${PEM2}' INT
 answers | /usr/bin/openssl req -newkey rsa:2048 -keyout "${PEM1}" -nodes -x509 -days 365 -out "${PEM2}" 2> /dev/null
 /usr/bin/openssl dhparam -out "${PEM3}" 4096
-touch "${1}" && cat "${PEM1}" > "${1}"
-touch "${2}" && cat "${PEM2}" > "${2}"
-touch "${3}" && cat "${PEM3}" > "${3}"
+install -Dv "${PEM1}" "${1}"
+install -Dv "${PEM2}" "${2}"
+install -Dv "${PEM3}" "${3}"
 rm -f "${PEM1}" "${PEM2}" "${PEM3}"
