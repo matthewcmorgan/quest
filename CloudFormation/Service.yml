@@ -50,7 +50,7 @@ Resources:
     Type: AWS::ECS::Service
     Properties:
       Cluster: !Ref ClusterName
-      DesiredCount: 1
+      DesiredCount: 2
       PropagateTags: SERVICE
       LaunchType: FARGATE
       TaskDefinition: !Ref TaskDefinition
