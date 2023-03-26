@@ -13,8 +13,8 @@ answers() {
 
 if [ $# -lt 2 ] ; then
         echo "Usage: (basename $0) filename1 filename2 filename3"
-        echo "Usage: filename1 ~= server.crt"
-        echo "Usage: filename2 ~= server.key"
+        echo "Usage: filename1 ~= server.key"
+        echo "Usage: filename2 ~= server.crt"
         echo "Usage: filename3 ~= dhparams.pem"
         exit 0
 fi
