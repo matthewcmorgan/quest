@@ -26,6 +26,10 @@ Parameters:
     Type: String
   AutoScalingRoleArn:
     Type: String
+  AlbSecurityGroup:
+    Type: String
+  TargetGroup:
+    Type: String
   ServiceName:
     Type: String
   ClusterName:
@@ -382,6 +386,7 @@ Resources:
                     "PrivateSubnetB": "${PrivateSubnetB}",
                     "ExecutionRoleArn": "${ExecutionRoleArn}",
                     "TaskRoleArn": "${TaskRoleArn}",
+                    "TargetGroup": "${TargetGroup}",
                     "AutoScalingRoleArn": "${AutoScalingRoleArn}",
                     "AlbSecurityGroup": "${AlbSecurityGroup}",
                     "ClusterName": "${ClusterName}",
