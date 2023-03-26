@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Builds Roles for Stack
+Description: Builds Pipeline for Stack
 Parameters:
   GitHubToken:
     Description: Personal Access Token for authenticating to GitHub
@@ -14,6 +14,14 @@ Parameters:
   GitHubBranch:
     Type: String
     Default: mmorgan
+  CodeBuildRoleArn:
+    Type: String
+  CodeBuildSecurityGroup:
+    Type: String
+  CodePipelineRoleArn:
+    Type: String
+  CodePipelineBucket:
+    Type: String
   VpcId: 
     Type: String
   PrivateSubnetA:
@@ -28,27 +36,14 @@ Parameters:
     Type: String
   AlbSecurityGroup:
     Type: String
-  TargetGroup:
-    Type: String
   ServiceName:
     Type: String
   ClusterName:
     Type: String
   ECSSecurityGroup:
     Type: String
-  ServiceLogs:
-    Type: String
 
 Resources:
-  CodeBuildSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Enable Egress traffic for codebuild
-      SecurityGroupEgress:
-        - CidrIp: 0.0.0.0/0
-          IpProtocol: "-1"
-          Description: Allow egress of anytype to anywhere
-      VpcId: !Sub "${VpcId}"
 
 # Must be updated after creation to correct value (or passed on the cli as a parameter-override)
   GitHubTokenSecret:
@@ -57,7 +52,6 @@ Resources:
     Type: AWS::SecretsManager::Secret
     Properties:
       Description: PAT for Github Access
-      Name: github-token-secret
       SecretString: !Sub '{"token":"${GitHubToken}"}'
 
   GitHubWebhook:
@@ -82,7 +76,7 @@ Resources:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Ref ServiceName
-      ServiceRole: !GetAtt CodeBuildRole.Arn
+      ServiceRole: !Ref CodeBuildRoleArn
       Artifacts:
         Type: CODEPIPELINE
       Environment:
@@ -109,225 +103,14 @@ Resources:
         Type: CODEPIPELINE
       TimeoutInMinutes: 15
 
-  CodeBuildRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: codebuild.amazonaws.com
-              AWS: !GetAtt CodePipelineServiceRole.Arn
-            Action: sts:AssumeRole
-        Version: '2012-10-17'
-      ManagedPolicyArns:
-        # More than necessary
-        - !Sub arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess
-      Policies:
-        - PolicyName: CodeBuildServiceRole 
-          PolicyDocument: 
-            Version: '2012-10-17'
-            Statement:
-            - Sid: CloudWatchLogsPolicy
-              Effect: Allow
-              Action:
-                - logs:CreateLogGroup
-                - logs:CreateLogStream
-                - logs:PutLogEvents
-              Resource: "*"
-            - Sid: S3GetObjectPolicy
-              Effect: Allow
-              Action:
-                - s3:GetObject
-                - s3:GetObjectVersion
-              Resource: "*"
-            - Sid: S3PutObjectPolicy
-              Effect: Allow
-              Action:
-                - s3:PutObject
-              Resource: "*"
-            - Sid: S3BucketIdentity
-              Effect: Allow
-              Action:
-                - s3:GetBucketAcl
-                - s3:GetBucketLocation
-              Resource: "*"
-
-  CodePipelineServiceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub ${AWS::StackName}-pipeline-role
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - codepipeline.amazonaws.com
-                - cloudformation.amazonaws.com
-              AWS:
-                - !Sub ${AWS::AccountId}
-            Action:
-              - sts:AssumeRole
-      Path: /
-      Policies:
-        - PolicyName: CodePipelineServiceRolePolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:GetObjectVersion
-                  - s3:GetBucketVersioning
-                Resource:
-                  - !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}/*
-                  - !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                Resource: !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}/*
-              - Effect: Allow
-                Action:
-                  - codebuild:*
-                  - cloudformation:*
-                  - codepipeline:*
-                  - iam:PassRole
-                  - ecs:*
-                  - ecr:*
-                  - application-autoscaling:*
-                  - cloudwatch:*
-                Resource: '*'
-
-  CodePipelineS3Bucket:
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Delete
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub ${ServiceName}-artifacts
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - BucketKeyEnabled: true
-            ServerSideEncryptionByDefault:
-              SSEAlgorithm: aws:kms
-              KMSMasterKeyID: !Ref PipelineKey
-      VersioningConfiguration:
-        Status: Enabled
-      LifecycleConfiguration:
-        Rules:
-          - Id: ExpirationRule
-            Status: Enabled
-            ExpirationInDays: 7
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: True
-        BlockPublicPolicy: True
-
-  CodePipelineS3BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref CodePipelineS3Bucket
-      PolicyDocument:
-        Version: '2012-10-17'
-        Id: SSEAndSSLPolicy
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS:
-                - !Sub ${AWS::AccountId}
-            Action:
-              - s3:GetObject
-              - s3:GetObjectAcl
-              - s3:GetObjectVersion
-              - s3:GetObjectVersionAcl
-              - s3:PutObject
-              - s3:PutObjectAcl
-              - s3:PutObjectVersionAcl
-            Resource: !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}/*
-          - Effect: Allow
-            Principal:
-              AWS:
-                - !Sub ${AWS::AccountId}
-            Action:
-              - s3:ListBucket
-            Resource: !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}
-
-  SigningKey:
-    Type: AWS::KMS::Key
-    Properties:
-      Enabled: true
-      Description: Key for signing images with cosign
-      KeyUsage: SIGN_VERIFY
-      KeySpec: ECC_NIST_P521
-      MultiRegion: false
-      KeyPolicy:
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Principal:
-            AWS:
-            - !Sub ${AWS::AccountId}
-          Action:
-            - kms:*
-          Resource: '*'
-        - Effect: Deny
-          Principal: '*'
-          Action:
-            - kms:DescribeKey
-            - kms:GetPublicKey
-            - kms:Sign
-            - kms:Verify
-          Resource: '*'
-          Condition:
-            Bool:
-              kms:GrantIsForAWSResource: false
-
-  SigningAlias:
-    Type: AWS::KMS::Alias
-    Properties:
-      AliasName: !Sub alias/${AWS::StackName}-key
-      TargetKeyId: !Ref SigningKey
-
-  PipelineKey:
-    Type: AWS::KMS::Key
-    Properties:
-      Description: Used to encrypt and decrypt pipeline data.
-      Enabled: true
-      EnableKeyRotation: true
-      KeyPolicy:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS:
-                - !Sub ${AWS::AccountId}
-            Action:
-              - kms:*
-            Resource: '*'
-          - Effect: Deny
-            Principal: '*'
-            Action:
-              - kms:CreateGrant
-              - kms:ListGrants
-              - kms:RevokeGrant
-            Resource: '*'
-            Condition:
-              Bool:
-                kms:GrantIsForAWSResource: false
-
-  PipelineKeyAlias:
-    Type: AWS::KMS::Alias
-    Properties:
-      AliasName: !Sub alias/${AWS::StackName}
-      TargetKeyId: !Ref PipelineKey
-
   CodePipeline:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Type: AWS::CodePipeline::Pipeline
     Properties:
-      RoleArn: !GetAtt CodePipelineServiceRole.Arn
+      RoleArn: !Ref CodePipelineRoleArn
       ArtifactStore:
-        Location: !Ref CodePipelineS3Bucket
+        Location: !Ref CodePipelineBucket
         Type: S3
       RestartExecutionOnUpdate: true
       Stages:
@@ -366,7 +149,7 @@ Resources:
                 - Name: SourceArtifact
               OutputArtifacts:
                 - Name: BuildOutput
-              RoleArn: !GetAtt CodeBuildRole.Arn
+              RoleArn: !Ref CodeBuildRoleArn
               RunOrder: 1
         - Name: Deploy
           Actions:
@@ -381,23 +164,21 @@ Resources:
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM
                 TemplatePath: BuildOutput::CloudFormation/Service.yml
-                RoleArn: !GetAtt CodePipelineServiceRole.Arn
+                RoleArn: !Ref CodePipelineRoleArn
                 ParameterOverrides: !Sub |
                   {
                     "PrivateSubnetA": "${PrivateSubnetA}",
                     "PrivateSubnetB": "${PrivateSubnetB}",
                     "ExecutionRoleArn": "${ExecutionRoleArn}",
                     "TaskRoleArn": "${TaskRoleArn}",
-                    "TargetGroup": "${TargetGroup}",
                     "AutoScalingRoleArn": "${AutoScalingRoleArn}",
                     "AlbSecurityGroup": "${AlbSecurityGroup}",
                     "ClusterName": "${ClusterName}",
                     "ECSSecurityGroup": "${ECSSecurityGroup}",
-                    "LogGroup": "${ServiceLogs}",
                     "Image": { "Fn::GetParam" : ["BuildOutput", "imageDetail.json", "ImageURI"]},
                     "Tag": { "Fn::GetParam" : ["BuildOutput", "imageDetail.json", "Tag"]}
                   }
               InputArtifacts:
                 - Name: BuildOutput
-              RoleArn: !GetAtt CodePipelineServiceRole.Arn
+              RoleArn: !Ref CodePipelineRoleArn
               RunOrder: 1

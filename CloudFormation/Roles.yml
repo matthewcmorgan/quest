@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Builds Roles for Stack
+Parameters:
+  
 
 Resources:
   AutoScalingRole:
@@ -11,15 +13,19 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: [autoscaling.amazonaws.com]
-            Action: [sts:AssumeRole]
+              Service: 
+                - autoscaling.amazonaws.com
+            Action: sts:AssumeRole
       Policies:
         - PolicyName: ecs-autoscaling-policy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
-                Action: [cloudwatch:DescribeAlarms, cloudwatch:GetMetricStatistics, cloudwatch:PutMetricAlarm]
+                Action: 
+                  - cloudwatch:DescribeAlarms
+                  - cloudwatch:GetMetricStatistics
+                  - cloudwatch:PutMetricAlarm
                 Resource: '*'
 
   ExecutionRole:
@@ -31,15 +37,16 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: [ecs-tasks.amazonaws.com]
-            Action: [sts:AssumeRole]
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
       Policies:
         - PolicyName: ecs-task-execution-policy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
-                Action: [ecr:*]
+                Action: 
+                  - ecr:*
                 Resource: '*'
               - Effect: Allow
                 Action:
@@ -56,8 +63,9 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: [ecs-tasks.amazonaws.com]
-            Action: [sts:AssumeRole]
+              Service: 
+                - ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
       Path: /
       Policies:
         - PolicyName: ecs-tasks-policy
@@ -66,7 +74,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - ecr:*
+                  - ecr:GetImage
                   - ecr:BatchCheckLayerAvailability
                   - ecr:GetDownloadUrlForResource
                   - ecr:BatchGetImage
@@ -74,7 +82,101 @@ Resources:
                   - logs:PutLogEvents
                 Resource: '*'
 
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+              AWS: !GetAtt CodePipelineServiceRole.Arn
+            Action: sts:AssumeRole
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+        # More than necessary
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess
+      Policies:
+        - PolicyName: CodeBuildServiceRole 
+          PolicyDocument: 
+            Version: '2012-10-17'
+            Statement:
+            - Sid: CloudWatchLogsPolicy
+              Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: "*"
+            - Sid: S3GetObjectPolicy
+              Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:GetObjectVersion
+              Resource: "*"
+            - Sid: S3PutObjectPolicy
+              Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource: "*"
+            - Sid: S3BucketIdentity
+              Effect: Allow
+              Action:
+                - s3:GetBucketAcl
+                - s3:GetBucketLocation
+              Resource: "*"
+
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-pipeline-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+                - cloudformation.amazonaws.com
+              AWS:
+                - !Sub ${AWS::AccountId}
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: CodePipelineServiceRolePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
+                Resource:
+                  - !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}/*
+                  - !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: !Sub arn:${AWS::Partition}:s3:::${CodePipelineS3Bucket}/*
+              - Effect: Allow
+                Action:
+                  - codebuild:*
+                  - cloudformation:*
+                  - codepipeline:*
+                  - iam:PassRole
+                  - ecs:*
+                  - ecr:*
+                  - application-autoscaling:*
+                  - cloudwatch:*
+                Resource: '*'
+
 Outputs:
+  CodeBuildRoleArn:
+    Value: !GetAtt CodeBuildRole.Arn
+  CodePipelineRoleArn:
+    Value: !GetAtt CodePipelineRole.Arn
   ExecutionRoleArn:
     Value: !GetAtt ExecutionRole.Arn
   TaskRoleArn:

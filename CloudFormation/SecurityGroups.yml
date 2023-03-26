@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Builds SecurityRoles for Stack
+Parameters:
+  VpcId: 
+    Type: String
+
+
+Resources:
+  CodeBuildSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable Egress traffic for codebuild
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: "-1"
+          Description: Allow egress of anytype to anywhere
+      VpcId: !Sub "${VpcId}"
+
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VpcId
+      GroupDescription: SG for ALB
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow outbound TCP Traffic to anywhere
+          IpProtocol: "-1"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          Description: Allow inbound TCP traffic on 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          Description: Allow inbound TCP traffic on 443
+          CidrIp: 0.0.0.0/0

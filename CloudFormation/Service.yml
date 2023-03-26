@@ -30,7 +30,10 @@ Parameters:
     Description: ARN for role to create tasks in ECS
     Type: String
   TargetGroup:
-    Description: ARN for ALB Target group
+    Description: ARN for role to create tasks in ECS
+    Type: String
+  TargetGroup1:
+    Description: ARN for role to create tasks in ECS
     Type: String
   ExecutionRoleArn:
     Description: ARN for role to execute tasks in ECS
@@ -58,6 +61,9 @@ Resources:
         - ContainerName: !Sub ${AWS::StackName}
           ContainerPort: 443
           TargetGroupArn: !Ref TargetGroup
+        - ContainerName: !Sub ${AWS::StackName}
+          ContainerPort: 80
+          TargetGroupArn: !Ref TargetGroup1
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:

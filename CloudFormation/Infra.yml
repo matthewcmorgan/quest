@@ -24,14 +24,6 @@ Resources:
     Properties:
       TemplateURL: "./Roles.yml"
 
-  ServiceLogs:
-    Type: AWS::Logs::LogGroup
-    UpdateReplacePolicy: Delete
-    DeletionPolicy: Delete
-    Properties:
-      LogGroupName: !Sub ${ServiceName}
-      RetentionInDays: 7
-
   Ecs:
     Type: AWS::CloudFormation::Stack
     UpdateReplacePolicy: Delete
@@ -56,11 +48,10 @@ Resources:
         PrivateSubnetB: !GetAtt Vpc.Outputs.PrivateSubnetB
         ExecutionRoleArn: !GetAtt Roles.Outputs.ExecutionRoleArn
         TaskRoleArn: !GetAtt Roles.Outputs.TaskRoleArn
-        TargetGroup: !GetAtt Ecs.Outputs.TargetGroup
         AutoScalingRoleArn: !GetAtt Roles.Outputs.AutoScalingRoleArn
+        ApplicationLoadBalancer: !GetAtt Ecs.Outputs.ApplicationLoadBalancer
         AlbSecurityGroup: !GetAtt Ecs.Outputs.AlbSecurityGroup
         ClusterName: !GetAtt Ecs.Outputs.ClusterName
         ServiceName: !Ref ServiceName
         ECSSecurityGroup: !GetAtt Ecs.Outputs.ECSSecurityGroup
-        ServiceLogs: !Ref ServiceLogs
         GitHubToken: !Ref GitHubToken
