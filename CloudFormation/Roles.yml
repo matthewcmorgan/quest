@@ -1,7 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Builds Roles for Stack
 Parameters:
-  
+  CodePipelineS3Bucket:
+    Type: String  
 
 Resources:
   AutoScalingRole:
@@ -90,7 +91,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: codebuild.amazonaws.com
-              AWS: !GetAtt CodePipelineServiceRole.Arn
+              AWS: !GetAtt CodePipelineRole.Arn
             Action: sts:AssumeRole
         Version: '2012-10-17'
       ManagedPolicyArns:

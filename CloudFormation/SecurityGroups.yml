@@ -36,3 +36,32 @@ Resources:
           ToPort: 443
           Description: Allow inbound TCP traffic on 443
           CidrIp: 0.0.0.0/0
+
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for ECS
+      VpcId: !Ref VpcId
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          Description: Allow outbound traffic
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          Description: Allow ingress on 443 from Alb
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          Description: Allow ingress on 443 from Alb
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
+
+Outputs:
+  AlbSecurityGroup:
+    Value: !Ref AlbSecurityGroup
+  CodeBuildSecurityGroup:
+    Value: !Ref ECSSecurityGroup
+  ECSSecurityGroup:
+    Value: !Ref ECSSecurityGroup

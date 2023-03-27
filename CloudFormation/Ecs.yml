@@ -3,35 +3,8 @@ Description: Builds vpc and supporting infra.
 Parameters:
   ServiceName:
     Type: String
-  Vpc:
-    Type: String
-  PublicSubnet1:
-    Type: String
-  PublicSubnet2:
-    Type: String
 
 Resources:
-  ECSSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Security group for ECS
-      VpcId: !Ref Vpc
-      SecurityGroupEgress:
-        - IpProtocol: "-1"
-          Description: Allow outbound traffic
-          CidrIp: 0.0.0.0/0
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          Description: Allow ingress on 443 from Alb
-          SourceSecurityGroupId: !Ref AlbSecurityGroup
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          Description: Allow ingress on 443 from Alb
-          SourceSecurityGroupId: !Ref AlbSecurityGroup
-
   Repository:
     Type: AWS::ECR::Repository
     DeletionPolicy: Delete
@@ -46,11 +19,5 @@ Resources:
       ClusterName: !Ref ServiceName
 
 Outputs:
-  ApplicationLoadBalancer:
-    Value: !Ref ApplicationLoadBalancer
-  AlbSecurityGroup:
-    Value: !Ref AlbSecurityGroup
   ClusterName:
     Value: !Ref Cluster
-  ECSSecurityGroup:
-    Value: !Ref ECSSecurityGroup

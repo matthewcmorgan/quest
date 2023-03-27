@@ -1,3 +1,19 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  PublicSubnet1:
+    Type: String
+  PublicSubnet2:
+    Type: String
+  VpcId: 
+    Type: String
+  AlbSecurityGroup:
+    Type: String
+  DomainName:
+    Type: String
+  HostedZoneId:
+    Type: String
+
+Resources:
   ApplicationLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -7,8 +23,6 @@
       Subnets:
         - !Ref PublicSubnet1
         - !Ref PublicSubnet2
-
-
 
   HTTPlistener:
    Type: AWS::ElasticLoadBalancingV2::Listener
@@ -51,7 +65,7 @@
       Protocol: HTTP
       TargetType: ip
       UnhealthyThresholdCount: 4
-      VpcId: !Sub "${Vpc}"
+      VpcId: !Sub "${VpcId}"
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: '10'
@@ -71,8 +85,15 @@
       Protocol: HTTP
       TargetType: ip
       UnhealthyThresholdCount: 4
-      VpcId: !Sub "${Vpc}"
+      VpcId: !Sub "${VpcId}"
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: '10'
 
+Outputs:
+  ApplicationLoadBalancer:
+    Value: !Ref ApplicationLoadBalancer
+  TargetGroup:
+    Value: !Ref TargetGroup
+  TargetGroup1:
+    Value: !Ref TargetGroup1

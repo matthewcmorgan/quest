@@ -2,3 +2,8 @@ node_modules/accepts node_modules/array-flatten node_modules/body-parser node_mo
 packaged.yml
 node_modules
 .bak.DS_Store
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
