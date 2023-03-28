@@ -59,9 +59,12 @@ diagram:
 # HERE THERE BE DRAGONS! GO FORTH WITH CAUTION!
 # Manual steps to build resources instead of cloudformation
 # Build the Docker image.
+CoPilot:
+	copilot init --app mcm-sample-app --name quest --type "Load Balanced Web Service" --dockerfile ./Dockerfile --port 3000 --deploy
+
 build:
 	@echo "Building the Docker image..."
-	docker build -t $(IMAGE_NAME) .
+	docker build --progress=plain -t $(IMAGE_NAME) .
 
 # Tag the Docker image with the ECR repository URL.
 tag:
