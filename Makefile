@@ -14,15 +14,16 @@ CONTAINER_NAME := mmorgan-ecs-test
 LOAD_BALANCER_NAME := mmorgan-ecs-test
 CERTIFICATE_ARN := <arn_of_your_tls_certificate>
 GH_TOKEN := $(GITHUB_PAT)
+SECRET_WORD := "SECRET_WORD"
 
 default: clean build run
 
-.PHONY: default destroy deploy diagram all build tag push configure-cluster create-repository create-task register-service create-target-group
+.PHONY: default destroy deploy diagram all build tag push configure-cluster create-repository create-task register-service create-target-group CoPilot
 
 all: build tag push configure-cluster create-repository create-task register-service create-target-group
 
 run: 
-	docker logs --follow `docker run -itd -p 3000:3000 -p 80:80 -p 443:443 $(IMAGE_NAME)`
+	docker logs --follow `docker run -itd -p 3000:3000 -p 80:80 -p 443:443 -e SECRET_WORD=$(SECRET_WORD) $(IMAGE_NAME)`
 
 connect:
 	docker run -it -p 3000:3000 $(IMAGE_NAME) sh
@@ -60,7 +61,7 @@ diagram:
 # Manual steps to build resources instead of cloudformation
 # Build the Docker image.
 CoPilot:
-	copilot init --app mcm-sample-app --name quest --type "Load Balanced Web Service" --dockerfile ./Dockerfile --port 3000 --deploy
+	copilot init --app mcm-sample-app --name quest --type "Load Balanced Web Service" --dockerfile ./Dockerfile --port 443 --deploy
 
 build:
 	@echo "Building the Docker image..."
