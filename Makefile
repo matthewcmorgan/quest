@@ -15,28 +15,28 @@ LOAD_BALANCER_NAME := mmorgan-ecs-test
 CERTIFICATE_ARN := <arn_of_your_tls_certificate>
 GH_TOKEN := $(GITHUB_PAT)
 
-default: destroy deploy
+default: clean build run
 
 .PHONY: default destroy deploy diagram all build tag push configure-cluster create-repository create-task register-service create-target-group
 
 all: build tag push configure-cluster create-repository create-task register-service create-target-group
 
 run: 
-	docker logs --follow `docker run -itd -p 3000:3000 -p 80:80 local:test`
+	docker logs --follow `docker run -itd -p 3000:3000 -p 80:80 -p 443:443 $(IMAGE_NAME)`
 
 connect:
-	docker run -it -p 3000:3000 local:test sh
+	docker run -it -p 3000:3000 $(IMAGE_NAME) sh
 
 test: build
 
 stop:
-	docker stop `docker ps -al` || exit 0
+	docker stop `docker ps -alq` || exit 0
 
 clean:
 	docker rm -f `docker ps -aq` || exit 0
 
 deploy: package
-	aws cloudformation deploy --template-file packaged.yml --stack-name mmorgan-ecs-test --capabilities CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides GitHubToken=$(GH_TOKEN)
+	aws cloudformation deploy --template-file packaged.yml --stack-name $(SERVICE_NAME) --capabilities CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides GitHubToken=$(GH_TOKEN)
 
 package:
 	aws cloudformation package --template-file CloudFormation/Infra.yml --s3-bucket matthew.morgan.bucket --output-template-file packaged.yml

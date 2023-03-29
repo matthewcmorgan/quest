@@ -19,14 +19,13 @@ RUN npm install -g npm \
 
 ### Run in nginx container
 FROM nginx:stable-alpine as final
-RUN apk add --no-cache nodejs openssl
+RUN apk add --no-cache openssl nodejs
 WORKDIR /src
 
 COPY --from=build /src .
 COPY --from=build /src/config/ /etc/nginx/
 
-
 RUN nginx -t
 EXPOSE 80 443 3000
-CMD ["sh", "-c", "nginx -g 'daemon off;'"]
+CMD ["/bin/sh", "-c", "nginx; node 000.js"]
 HEALTHCHECK CMD wget --quiet --tries=1 --spider https://localhost/health || exit 1
