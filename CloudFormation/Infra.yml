@@ -88,22 +88,22 @@ Resources:
     Properties:
       TemplateURL: "./Pipeline.yml"
       Parameters:
-        VpcId: !GetAtt Vpc.Outputs.VpcId
-        PrivateSubnetA: !GetAtt Vpc.Outputs.PrivateSubnetA
-        PrivateSubnetB: !GetAtt Vpc.Outputs.PrivateSubnetB
-        ExecutionRoleArn: !GetAtt Roles.Outputs.ExecutionRoleArn
-        TaskRoleArn: !GetAtt Roles.Outputs.TaskRoleArn
-        AutoScalingRoleArn: !GetAtt Roles.Outputs.AutoScalingRoleArn
         AlbSecurityGroup: !GetAtt SecurityGroups.Outputs.AlbSecurityGroup
-        ClusterName: !GetAtt Ecs.Outputs.ClusterName
-        ServiceName: !Ref ServiceName
-        ECSSecurityGroup: !GetAtt SecurityGroups.Outputs.ECSSecurityGroup
-        GitHubToken: !Ref GitHubToken
+        AutoScalingRoleArn: !GetAtt Roles.Outputs.AutoScalingRoleArn
         CodeBuildSecurityGroup: !GetAtt SecurityGroups.Outputs.CodeBuildSecurityGroup
         CodePipelineRoleArn: !GetAtt Roles.Outputs.CodePipelineRoleArn
         CodeBuildRoleArn: !GetAtt Roles.Outputs.CodeBuildRoleArn
         CodePipelineBucket: !GetAtt Bucket.Outputs.Bucket
-        SigningKeyArn: !GetAtt Kms.Outputs.SigningKey
+        ClusterName: !GetAtt Ecs.Outputs.ClusterName
+        ECSSecurityGroup: !GetAtt SecurityGroups.Outputs.ECSSecurityGroup
+        ExecutionRoleArn: !GetAtt Roles.Outputs.ExecutionRoleArn
+        GitHubToken: !Ref GitHubToken
         LogGroup: !Ref LogGroup
+        PrivateSubnetA: !GetAtt Vpc.Outputs.PrivateSubnetA
+        PrivateSubnetB: !GetAtt Vpc.Outputs.PrivateSubnetB
+        ServiceName: !Ref ServiceName
+        SigningKeyArn: !GetAtt Kms.Outputs.SigningKey
         TargetGroup: !GetAtt Alb.Outputs.TargetGroup
         TargetGroup1: !GetAtt Alb.Outputs.TargetGroup1
+        TaskRoleArn: !GetAtt Roles.Outputs.TaskRoleArn
+        VpcId: !GetAtt Vpc.Outputs.VpcId
