@@ -6,7 +6,6 @@ Resources:
     Type: AWS::KMS::Key
     Properties:
       Enabled: true
-      EnableKeyRotation: true
       Description: Key for signing images with cosign
       KeyUsage: SIGN_VERIFY
       KeySpec: ECC_NIST_P521
