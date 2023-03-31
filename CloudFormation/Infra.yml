@@ -73,6 +73,14 @@ Resources:
         VpcId: !GetAtt Vpc.Outputs.VpcId
         AlbSecurityGroup: !GetAtt SecurityGroups.Outputs.AlbSecurityGroup
 
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Join ['', [/ecs/, !Ref ServiceName]]
+      RetentionInDays: 7
+
   Pipeline:
     Type: AWS::CloudFormation::Stack
     UpdateReplacePolicy: Delete
@@ -96,3 +104,6 @@ Resources:
         CodeBuildRoleArn: !GetAtt Roles.Outputs.CodeBuildRoleArn
         CodePipelineBucket: !GetAtt Bucket.Outputs.Bucket
         SigningKeyArn: !GetAtt Kms.Outputs.SigningKey
+        LogGroup: !Ref LogGroup
+        TargetGroup: !GetAtt Alb.Outputs.TargetGroup
+        TargetGroup1: !GetAtt Alb.Outputs.TargetGroup1
