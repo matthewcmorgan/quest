@@ -8,7 +8,6 @@ Resources:
   AutoScalingRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::StackName}-asg-role
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -32,7 +31,6 @@ Resources:
   ExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::StackName}-execution-role
       Path: /
       AssumeRolePolicyDocument:
         Statement:
@@ -59,7 +57,6 @@ Resources:
   TaskRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::StackName}-task-role
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -130,7 +127,6 @@ Resources:
   CodePipelineRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::StackName}-pipeline-role
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:

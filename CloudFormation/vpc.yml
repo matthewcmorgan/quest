@@ -44,7 +44,7 @@ Resources:
     Properties:
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       CidrBlock: !Ref PublicSubnet1Cidr
-      MapPublicIpOnLaunch: true
+      MapPublicIpOnLaunch: false
       VpcId: !Ref Vpc
 
   PublicSubnet2:
@@ -52,7 +52,7 @@ Resources:
     Properties:
       AvailabilityZone: !Select [ 1, !GetAZs '' ]
       CidrBlock: !Ref PublicSubnet2Cidr
-      MapPublicIpOnLaunch: true
+      MapPublicIpOnLaunch: false
       VpcId: !Ref Vpc
 
   PrivateSubnetA:
