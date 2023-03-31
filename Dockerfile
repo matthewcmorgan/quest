@@ -26,6 +26,8 @@ COPY --from=build /src .
 COPY --from=build /src/config/ /etc/nginx/
 
 RUN nginx -t
+RUN chown -R nginx .
+USER nginx
 EXPOSE 80 443 3000
 CMD ["/bin/sh", "-c", "nginx; node 000.js"]
 HEALTHCHECK CMD wget --quiet --tries=1 --spider https://localhost/health || exit 1

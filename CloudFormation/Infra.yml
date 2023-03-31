@@ -86,9 +86,12 @@ Resources:
         ExecutionRoleArn: !GetAtt Roles.Outputs.ExecutionRoleArn
         TaskRoleArn: !GetAtt Roles.Outputs.TaskRoleArn
         AutoScalingRoleArn: !GetAtt Roles.Outputs.AutoScalingRoleArn
-        ApplicationLoadBalancer: !GetAtt Alb.Outputs.ApplicationLoadBalancer
         AlbSecurityGroup: !GetAtt SecurityGroups.Outputs.AlbSecurityGroup
         ClusterName: !GetAtt Ecs.Outputs.ClusterName
         ServiceName: !Ref ServiceName
         ECSSecurityGroup: !GetAtt SecurityGroups.Outputs.ECSSecurityGroup
         GitHubToken: !Ref GitHubToken
+        CodeBuildSecurityGroup: !GetAtt SecurityGroups.Outputs.CodeBuildSecurityGroup
+        CodePipelineRoleArn: !GetAtt Roles.Outputs.CodePipelineRoleArn
+        CodeBuildRoleArn: !GetAtt Roles.Outputs.CodeBuildRoleArn
+        CodePipelineBucket: !GetAtt Bucket.Outputs.Bucket
