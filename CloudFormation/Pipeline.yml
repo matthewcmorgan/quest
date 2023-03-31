@@ -1,48 +1,54 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Builds Pipeline for Stack
 Parameters:
-  GitHubToken:
-    Description: Personal Access Token for authenticating to GitHub
+  AlbSecurityGroup:
     Type: String
-    NoEcho: true
-  GitHubRepositoryName:
+  AutoScalingRoleArn:
     Type: String
-    Default: quest
-  GitHubOwner:
+  ClusterName:
     Type: String
-    Default: matthewcmorgan
-  GitHubBranch:
-    Type: String
-    Default: mmorgan
   CodeBuildRoleArn:
     Type: String
   CodeBuildSecurityGroup:
     Type: String
-  CodePipelineRoleArn:
-    Type: String
   CodePipelineBucket:
     Type: String
-  VpcId: 
+  CodePipelineRoleArn:
+    Type: String
+  ECSSecurityGroup:
+    Type: String
+  ExecutionRoleArn:
+    Type: String
+  GitHubBranch:
+    Type: String
+  GitHubOwner:
+    Type: String
+    Default: matthewcmorgan
+  GitHubRepositoryName:
+    Type: String
+    Default: quest
+  GitHubToken:
+    Description: Personal Access Token for authenticating to GitHub
+    Type: String
+    NoEcho: true
+    Default: mmorgan
+  LogGroup:
     Type: String
   PrivateSubnetA:
     Type: String
   PrivateSubnetB:
     Type: String
-  ExecutionRoleArn:
+  ServiceName:
+    Type: String
+  SigningKeyArn:
+    Type: String
+  TargetGroup:
+    Type: String
+  TargetGroup1:
     Type: String
   TaskRoleArn:
     Type: String
-  AutoScalingRoleArn:
-    Type: String
-  AlbSecurityGroup:
-    Type: String
-  ServiceName:
-    Type: String
-  ClusterName:
-    Type: String
-  ECSSecurityGroup:
-    Type: String
-  SigningKeyArn:
+  VpcId: 
     Type: String
 
 Resources:
@@ -169,16 +175,19 @@ Resources:
                 RoleArn: !Ref CodePipelineRoleArn
                 ParameterOverrides: !Sub |
                   {
-                    "PrivateSubnetA": "${PrivateSubnetA}",
-                    "PrivateSubnetB": "${PrivateSubnetB}",
-                    "ExecutionRoleArn": "${ExecutionRoleArn}",
-                    "TaskRoleArn": "${TaskRoleArn}",
-                    "AutoScalingRoleArn": "${AutoScalingRoleArn}",
                     "AlbSecurityGroup": "${AlbSecurityGroup}",
+                    "AutoScalingRoleArn": "${AutoScalingRoleArn}",
                     "ClusterName": "${ClusterName}",
                     "ECSSecurityGroup": "${ECSSecurityGroup}",
+                    "ExecutionRoleArn": "${ExecutionRoleArn}",
                     "Image": { "Fn::GetParam" : ["BuildOutput", "imageDetail.json", "ImageURI"]},
-                    "Tag": { "Fn::GetParam" : ["BuildOutput", "imageDetail.json", "Tag"]}
+                    "PrivateSubnetA": "${PrivateSubnetA}",
+                    "PrivateSubnetB": "${PrivateSubnetB}",
+                    "Tag": { "Fn::GetParam" : ["BuildOutput", "imageDetail.json", "Tag"]},
+                    "TargetGroup": ${TargetGroup},
+                    "TargetGroup1": ${TargetGroup1},
+                    "LogGroup": ${LogGroup},
+                    "TaskRoleArn": "${TaskRoleArn}",
                   }
               InputArtifacts:
                 - Name: BuildOutput
