@@ -23,6 +23,34 @@ Resources:
     DeletionPolicy: Delete
     Properties:
       TemplateURL: "./Roles.yml"
+      Parameters:
+        CodePipelineS3Bucket: !GetAtt Bucket.Outputs.Bucket
+
+  Kms:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Properties:
+      TemplateURL: "./Kms.yml"
+
+  SecurityGroups:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Properties:
+      TemplateURL: "./SecurityGroups.yml"
+      Parameters:
+        VpcId: !GetAtt Vpc.Outputs.VpcId
+
+  Bucket:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Properties:
+      TemplateURL: "./S3.yml"
+      Parameters:
+        PipelineKey: !GetAtt Kms.Outputs.PipelineKey
+        ServiceName: !Ref ServiceName
 
   Ecs:
     Type: AWS::CloudFormation::Stack
@@ -32,9 +60,18 @@ Resources:
       TemplateURL: "./Ecs.yml"
       Parameters:
         ServiceName: !Sub ${ServiceName}
-        Vpc: !GetAtt Vpc.Outputs.VpcId
+
+  Alb:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Properties:
+      TemplateURL: "./Alb.yml"
+      Parameters:
         PublicSubnet1: !GetAtt Vpc.Outputs.PublicSubnet1
         PublicSubnet2: !GetAtt Vpc.Outputs.PublicSubnet2
+        VpcId: !GetAtt Vpc.Outputs.VpcId
+        AlbSecurityGroup: !GetAtt SecurityGroups.Outputs.AlbSecurityGroup
 
   Pipeline:
     Type: AWS::CloudFormation::Stack
@@ -49,9 +86,9 @@ Resources:
         ExecutionRoleArn: !GetAtt Roles.Outputs.ExecutionRoleArn
         TaskRoleArn: !GetAtt Roles.Outputs.TaskRoleArn
         AutoScalingRoleArn: !GetAtt Roles.Outputs.AutoScalingRoleArn
-        ApplicationLoadBalancer: !GetAtt Ecs.Outputs.ApplicationLoadBalancer
-        AlbSecurityGroup: !GetAtt Ecs.Outputs.AlbSecurityGroup
+        ApplicationLoadBalancer: !GetAtt Alb.Outputs.ApplicationLoadBalancer
+        AlbSecurityGroup: !GetAtt SecurityGroups.Outputs.AlbSecurityGroup
         ClusterName: !GetAtt Ecs.Outputs.ClusterName
         ServiceName: !Ref ServiceName
-        ECSSecurityGroup: !GetAtt Ecs.Outputs.ECSSecurityGroup
+        ECSSecurityGroup: !GetAtt SecurityGroups.Outputs.ECSSecurityGroup
         GitHubToken: !Ref GitHubToken

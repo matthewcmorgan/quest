@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Builds Roles for Stack
+Description: Builds Keys for Stack
 
 Resources:
   SigningKey:

@@ -8,10 +8,6 @@ Parameters:
     Type: String
   AlbSecurityGroup:
     Type: String
-  DomainName:
-    Type: String
-  HostedZoneId:
-    Type: String
 
 Resources:
   ApplicationLoadBalancer:

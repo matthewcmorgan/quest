@@ -1,9 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Builds SecurityRoles for Stack
+Description: Builds SecurityGroups for Stack
 Parameters:
   VpcId: 
     Type: String
-
 
 Resources:
   CodeBuildSecurityGroup:
