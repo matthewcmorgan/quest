@@ -95,3 +95,4 @@ Resources:
         CodePipelineRoleArn: !GetAtt Roles.Outputs.CodePipelineRoleArn
         CodeBuildRoleArn: !GetAtt Roles.Outputs.CodeBuildRoleArn
         CodePipelineBucket: !GetAtt Bucket.Outputs.Bucket
+        SigningKeyArn: !GetAtt Kms.Outputs.SigningKey
