@@ -42,10 +42,6 @@ phases:
 
       - printf '{"ImageURI":"%s", "Tag":"%s"}' "$REPOSITORY_URI:$IMAGE_TAG" "$IMAGE_TAG" | tee imageDetail.json
 
-      # We could generate certs and attach to ACM instead of nginx.
-      - ./src/make_dummy_cert.sh key.pem cert.pem
-      - aws acm import-certificate --certificate file://cert.pem --private-key file://key.pem
-
 reports:
   checkovScan:
     files:
