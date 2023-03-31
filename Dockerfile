@@ -8,9 +8,9 @@ RUN ./config/make-dummy-cert.sh ./config/nginx.key ./config/nginx.crt ./config/d
 # nginx.conf
 COPY config/ ./config/
 
-COPY bin/ ./bin
-COPY package*.json .
-COPY src/ .
+COPY bin/ ./bin/
+COPY package*.json ./
+COPY src/ ./
 
 RUN npm install -g npm \
     && npm install . \
@@ -22,11 +22,11 @@ FROM nginx:stable-alpine as final
 RUN apk add --no-cache openssl nodejs
 WORKDIR /src
 
-COPY --from=build /src .
+COPY --from=build /src ./
 COPY --from=build /src/config/ /etc/nginx/
 
 RUN nginx -t
-RUN chown -R nginx .
+RUN chown -R nginx ./
 USER nginx
 EXPOSE 80 443 3000
 CMD ["/bin/sh", "-c", "nginx; node 000.js"]
