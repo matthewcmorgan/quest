@@ -21,6 +21,7 @@ Parameters:
     Type: String
   GitHubBranch:
     Type: String
+    Default: mmorgan
   GitHubOwner:
     Type: String
     Default: matthewcmorgan
@@ -31,7 +32,6 @@ Parameters:
     Description: Personal Access Token for authenticating to GitHub
     Type: String
     NoEcho: true
-    Default: mmorgan
   LogGroup:
     Type: String
   PrivateSubnetA:
