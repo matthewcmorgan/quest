@@ -78,7 +78,7 @@ Resources:
     UpdateReplacePolicy: Delete
     DeletionPolicy: Delete
     Properties:
-      LogGroupName: !Join ['', [/ecs/, !Ref ServiceName]]
+      LogGroupName: !Sub /ecs/${ServiceName}
       RetentionInDays: 7
 
   Pipeline:

@@ -184,10 +184,10 @@ Resources:
                     "PrivateSubnetA": "${PrivateSubnetA}",
                     "PrivateSubnetB": "${PrivateSubnetB}",
                     "Tag": { "Fn::GetParam" : ["BuildOutput", "imageDetail.json", "Tag"]},
-                    "TargetGroup": ${TargetGroup},
-                    "TargetGroup1": ${TargetGroup1},
-                    "LogGroup": ${LogGroup},
-                    "TaskRoleArn": "${TaskRoleArn}",
+                    "TargetGroup": "${TargetGroup}",
+                    "TargetGroup1": "${TargetGroup1}",
+                    "LogGroup": "${LogGroup}",
+                    "TaskRoleArn": "${TaskRoleArn}"
                   }
               InputArtifacts:
                 - Name: BuildOutput
