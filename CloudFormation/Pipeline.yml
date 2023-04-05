@@ -113,7 +113,7 @@ Resources:
       Source:
         BuildSpec: CloudFormation/buildspec.yml
         Type: CODEPIPELINE
-      TimeoutInMinutes: 15
+      TimeoutInMinutes: 20
 
   CodePipeline:
     DeletionPolicy: Delete

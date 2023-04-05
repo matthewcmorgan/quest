@@ -13,6 +13,28 @@ Resources:
         ScanOnPush: true
       LifecyclePolicy:
         LifecyclePolicyText: '{"rules": [{"rulePriority": 1, "description": "keep last 5 images", "selection": { "tagStatus": "any", "countType": "imageCountMoreThan", "countNumber": 5}, "action": { "type": "expire"}}]}'
+      RepositoryPolicyText:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: CodeBuildAccess
+            Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action:
+              - ecr:BatchGetImage
+              - ecr:BatchCheckLayerAvailability
+              - ecr:CompleteLayerUpload
+              - ecr:DescribeImages
+              - ecr:DescribeRepositories
+              - ecr:GetDownloadUrlForLayer
+              - ecr:InitiateLayerUpload
+              - ecr:ListImages
+              - ecr:PutImage
+              - ecr:UploadLayerPart
+            Resource: !Sub arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountID}:repository/${ServiceName}
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Sub ${AWS::AccountId}
 
   Cluster:
     Type: AWS::ECS::Cluster
