@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Description: Builds Pipeline for Stack
 Parameters:
   AlbSecurityGroup:
@@ -48,12 +48,11 @@ Parameters:
     Type: String
   TaskRoleArn:
     Type: String
-  VpcId: 
+  VpcId:
     Type: String
 
 Resources:
-
-# Must be updated after creation to correct value (or passed on the cli as a parameter-override)
+  # Must be updated after creation to correct value (or passed on the cli as a parameter-override)
   GitHubTokenSecret:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
@@ -69,11 +68,19 @@ Resources:
     Properties:
       Authentication: GITHUB_HMAC
       AuthenticationConfiguration:
-        SecretToken: !Join [':', ['{{resolve:secretsmanager', !Ref GitHubTokenSecret, 'SecretString:token}}']]
+        SecretToken:
+          !Join [
+            ":",
+            [
+              "{{resolve:secretsmanager",
+              !Ref GitHubTokenSecret,
+              "SecretString:token}}",
+            ],
+          ]
       RegisterWithThirdParty: true
       Filters:
-      - JsonPath: "$.ref"
-        MatchEquals: refs/heads/{Branch}
+        - JsonPath: "$.ref"
+          MatchEquals: refs/heads/{Branch}
       TargetPipeline: !Ref CodePipeline
       TargetAction: Source
       TargetPipelineVersion: !GetAtt CodePipeline.Version
@@ -128,13 +135,21 @@ Resources:
               ActionTypeId:
                 Category: Source
                 Owner: ThirdParty
-                Version: '1'
+                Version: "1"
                 Provider: GitHub
               Configuration:
                 Owner: !Ref GitHubOwner
                 Repo: !Ref GitHubRepositoryName
                 Branch: !Ref GitHubBranch
-                OAuthToken: !Join [':', ['{{resolve:secretsmanager', !Ref GitHubTokenSecret, 'SecretString:token}}']]
+                OAuthToken:
+                  !Join [
+                    ":",
+                    [
+                      "{{resolve:secretsmanager",
+                      !Ref GitHubTokenSecret,
+                      "SecretString:token}}",
+                    ],
+                  ]
                 PollForSourceChanges: false
               OutputArtifacts:
                 - Name: SourceArtifact
@@ -145,7 +160,7 @@ Resources:
               ActionTypeId:
                 Category: Build
                 Owner: AWS
-                Version: '1'
+                Version: "1"
                 Provider: CodeBuild
               Configuration:
                 ProjectName: !Ref CodeBuildProject
@@ -165,7 +180,7 @@ Resources:
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
-                Version: '1'
+                Version: "1"
                 Provider: CloudFormation
               Configuration:
                 StackName: !Sub ${AWS::StackName}-Service
@@ -180,7 +195,7 @@ Resources:
                     "ClusterName": "${ClusterName}",
                     "ECSSecurityGroup": "${ECSSecurityGroup}",
                     "ExecutionRoleArn": "${ExecutionRoleArn}",
-                    "Image": { "Fn::GetParam" : ["BuildOutput", "imageDetail.json", "ImageURI"]},
+                    "Image": { "Fn::GetParam" : ["BuildOutput", "imageDetail.json", "Image"]},
                     "PrivateSubnetA": "${PrivateSubnetA}",
                     "PrivateSubnetB": "${PrivateSubnetB}",
                     "Tag": { "Fn::GetParam" : ["BuildOutput", "imageDetail.json", "Tag"]},
