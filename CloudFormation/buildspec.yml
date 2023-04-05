@@ -33,7 +33,7 @@ phases:
       - docker tag $IMAGE_URI $REPOSITORY_URI:$IMAGE_TAG
       # Trivy Scan  image
       - trivy image ${IMAGE_URI} --format cosign-vuln --output trivy.output
-      - docker push ${REPOSITORY_URI}:${IMAGE_TAG}
+      - docker push ${IMAGE_URI}
       - IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_URI})
       # Generate a keypair for signing and verify
       - cosign generate-key-pair --kms awskms:///${COSIGN_KEY_ARN}

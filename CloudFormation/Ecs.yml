@@ -31,7 +31,6 @@ Resources:
               - ecr:ListImages
               - ecr:PutImage
               - ecr:UploadLayerPart
-            Resource: !Sub arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountID}:repository/${ServiceName}
             Condition:
               StringEquals:
                 aws:SourceAccount: !Sub ${AWS::AccountId}
@@ -42,5 +41,7 @@ Resources:
       ClusterName: !Ref ServiceName
 
 Outputs:
+  Repository:
+    Value: !Ref Repository
   ClusterName:
     Value: !Ref Cluster

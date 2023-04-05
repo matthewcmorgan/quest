@@ -123,6 +123,11 @@ Resources:
                 - s3:GetBucketAcl
                 - s3:GetBucketLocation
               Resource: "*"
+            - Sid: ECRIdentity
+              Effect: Allow
+              Action:
+                - ecr:*
+              Resource: "*"
         - PolicyName: pass-ecs-role
           PolicyDocument:
             Version: "2012-10-17"

@@ -101,6 +101,7 @@ Resources:
         LogGroup: !Ref LogGroup
         PrivateSubnetA: !GetAtt Vpc.Outputs.PrivateSubnetA
         PrivateSubnetB: !GetAtt Vpc.Outputs.PrivateSubnetB
+        Repository: !GetAtt Ecs.Outputs.Repository
         ServiceName: !Ref ServiceName
         SigningKeyArn: !GetAtt Kms.Outputs.SigningKey
         TargetGroup: !GetAtt Alb.Outputs.TargetGroup

@@ -38,6 +38,8 @@ Parameters:
     Type: String
   PrivateSubnetB:
     Type: String
+  Repository:
+    Type: String
   ServiceName:
     Type: String
   SigningKeyArn:
@@ -101,7 +103,7 @@ Resources:
           - Name: AWS_ACCOUNT_ID
             Value: !Ref AWS::AccountId
           - Name: REPOSITORY_URI
-            Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ServiceName}
+            Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Repository}
         PrivilegedMode: true
       VpcConfig:
         SecurityGroupIds:
