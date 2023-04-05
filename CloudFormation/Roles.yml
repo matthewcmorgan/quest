@@ -123,6 +123,25 @@ Resources:
                 - s3:GetBucketAcl
                 - s3:GetBucketLocation
               Resource: "*"
+        - PolicyName: pass-ecs-role
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "iam:PassRole"
+                Resource:
+                  - !GetAtt ExecutionRole.Arn
+                  - !GetAtt TaskRole.Arn
+        - PolicyName: ecs-tasks
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ecs:RunTask"
+                Resource:
+                  - "*"
 
   CodePipelineRole:
     Type: AWS::IAM::Role

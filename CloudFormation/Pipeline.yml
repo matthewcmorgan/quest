@@ -68,13 +68,10 @@ Resources:
     Properties:
       Authentication: GITHUB_HMAC
       AuthenticationConfiguration:
-        SecretToken:
-          !Join [
-            ":",
-            [
-              "{{resolve:secretsmanager",
+        SecretToken: !Join [ ":",
+            [ "{{resolve:secretsmanager",
               !Ref GitHubTokenSecret,
-              "SecretString:token}}",
+              "SecretString:token}}"
             ],
           ]
       RegisterWithThirdParty: true
@@ -141,14 +138,11 @@ Resources:
                 Owner: !Ref GitHubOwner
                 Repo: !Ref GitHubRepositoryName
                 Branch: !Ref GitHubBranch
-                OAuthToken:
-                  !Join [
-                    ":",
-                    [
-                      "{{resolve:secretsmanager",
+                OAuthToken: !Join [ ":",
+                    [ "{{resolve:secretsmanager",
                       !Ref GitHubTokenSecret,
-                      "SecretString:token}}",
-                    ],
+                      "SecretString:token}}"
+                    ]
                   ]
                 PollForSourceChanges: false
               OutputArtifacts:
@@ -189,21 +183,7 @@ Resources:
                 TemplatePath: BuildOutput::CloudFormation/Service.yml
                 RoleArn: !Ref CodePipelineRoleArn
                 ParameterOverrides: !Sub |
-                  {
-                    "AlbSecurityGroup": "${AlbSecurityGroup}",
-                    "AutoScalingRoleArn": "${AutoScalingRoleArn}",
-                    "ClusterName": "${ClusterName}",
-                    "ECSSecurityGroup": "${ECSSecurityGroup}",
-                    "ExecutionRoleArn": "${ExecutionRoleArn}",
-                    "Image": { "Fn::GetParam" : ["BuildOutput", "imageDetail.json", "Image"]},
-                    "PrivateSubnetA": "${PrivateSubnetA}",
-                    "PrivateSubnetB": "${PrivateSubnetB}",
-                    "Tag": { "Fn::GetParam" : ["BuildOutput", "imageDetail.json", "Tag"]},
-                    "TargetGroup": "${TargetGroup}",
-                    "TargetGroup1": "${TargetGroup1}",
-                    "LogGroup": "${LogGroup}",
-                    "TaskRoleArn": "${TaskRoleArn}"
-                  }
+                  {"AlbSecurityGroup":"${AlbSecurityGroup}","AutoScalingRoleArn":"${AutoScalingRoleArn}","ClusterName":"${ClusterName}","ECSSecurityGroup":"${ECSSecurityGroup}","ExecutionRoleArn":"${ExecutionRoleArn}","Image":{"Fn::GetParam":["BuildOutput","imageDetail.json","Image"]},"PrivateSubnetA":"${PrivateSubnetA}","PrivateSubnetB":"${PrivateSubnetB}","Tag":{"Fn::GetParam":["BuildOutput","imageDetail.json","Tag"]},"TargetGroup":"${TargetGroup}","TargetGroup1":"${TargetGroup1}","LogGroup":"${LogGroup}","TaskRoleArn":"${TaskRoleArn}"}
               InputArtifacts:
                 - Name: BuildOutput
               RoleArn: !Ref CodePipelineRoleArn
