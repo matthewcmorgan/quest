@@ -29,11 +29,11 @@ phases:
       # Run Chekov against image
       - checkov --file Dockerfile --output junitxml --output cli --output-file-path results.xml,console
       # Build Image
-      - docker build --no-cache --pull -f Dockerfile -t ${IMAGE_URI} .
-      - docker tag $IMAGE_URI $REPOSITORY_URI:$IMAGE_TAG
+      - docker build --no-cache --pull -f Dockerfile -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker tag $REPOSITORY_URI:$IMAGE_TAG $IMAGE_URI
       # Trivy Scan  image
-      - trivy image ${IMAGE_URI} --format cosign-vuln --output trivy.output
-      - docker push ${IMAGE_URI}
+      - trivy image $REPOSITORY_URI:$IMAGE_TAG --format cosign-vuln --output trivy.output
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
       - IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_URI})
       # Generate a keypair for signing and verify
       - cosign generate-key-pair --kms awskms:///${COSIGN_KEY_ARN}
